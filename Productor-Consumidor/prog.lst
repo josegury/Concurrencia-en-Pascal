@@ -1,0 +1,210 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 
+    3     0 var dato : integer;
+    4     0  producido : boolean;
+    5     0  mutex : semaphore;
+    6     0 
+    7     0 process productor;
+    8     0 var i : integer;
+    9     0 begin
+   10     0  
+   11     0  for i := 1 to 100 do
+   12     4  begin
+   13     4   while(producido) do null;
+   14     7    dato := i;
+   15    10    producido := true;
+   16    13  end;
+   17    14 end;
+   18    15 
+   19    15 
+   20    15 process consumidor;
+   21    15 var i : integer;
+   22    15 begin 
+   23    15  for i:= 1 to 100 do
+   24    19  begin
+   25    19   while (not producido) do null;
+   26    23    writeln(dato);
+   27    26    producido := false;    
+   28    29  end;
+   29    30 end;
+   30    31 
+   31    31 
+   32    31 process consdos;
+   33    31 var i : integer;
+   34    31 begin 
+   35    31  for i:= 1 to 100 do
+   36    35  begin
+   37    35   while (not producido) do null;
+   38    39    wait(mutex);
+   39    41    if (producido) then
+   40    43    begin
+   41    43     writeln('Consumidor2: ',dato);
+   42    48     producido := false;  
+   43    51    end; 
+   44    51    signal(mutex);   
+   45    53  end;
+   46    54 end;
+   47    55 
+   48    55 process constres;
+   49    55 var i : integer;
+   50    55 begin 
+   51    55  for i:= 1 to 100 do
+   52    59  begin
+   53    59   while (not producido) do null;
+   54    63    wait(mutex);
+   55    65    if (producido) then
+   56    67    begin
+   57    67     writeln('Consumidor3: ',dato);
+   58    72     producido := false;  
+   59    75    end; 
+   60    75    signal(mutex); 
+   61    77  end;
+   62    78 end;
+   63    79 
+   64    79 
+   65    79 (*Main*)
+   66    79 
+   67    79 begin
+   68    79  producido := false;
+   69    82  initial(mutex,1);
+   70    86  cobegin
+   71    87   productor;
+   72    91   consdos;
+   73    95   constres;
+   74    99  coend;
+   75   100 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   79    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 dato         46     variable    integer         0      True    1    5    0
+ 48 producido    47     variable    boolean         0      True    1    6    0
+ 49 mutex        48     variable    semaphore       0      True    1    7    0
+ 50 productor    49     variable    process         3      True    1    8    0
+ 51 $            50     type id     process         3      True    1    0    0
+ 52 i             0     variable    integer         0      True    2    5    0
+ 53 consumidor   51     variable    process         4      True    1    9    0
+ 54 $            53     type id     process         4      True    1   15    0
+ 55 i             0     variable    integer         0      True    2    5    0
+ 56 consdos      54     variable    process         5      True    1   10    0
+ 57 $            56     type id     process         5      True    1   31    0
+ 58 i             0     variable    integer         0      True    2    5    0
+ 59 constres     57     variable    process         6      True    1   11    0
+ 60 $            59     type id     process         6      True    1   55    0
+ 61 i             0     variable    integer         0      True    2    5    0
+
+Generated P-code
+
+    0     ldadr        2         5          ;9
+    1     ldcon.i      0         1          ;11
+    2     ldcon.i      0       100          ;11
+    3     for1u.i      0        14          ;11
+    4     ldval.b      1         6          ;13
+    5     jmpiz        0         7          ;13
+    6     jmpuc        0         4          ;13
+    7     ldadr        1         5          ;13
+    8     ldval.i      2         5          ;14
+    9     store.i      0         0          ;14
+   10     ldadr        1         6          ;14
+   11     ldcon.b      0         1          ;15
+   12     store.b      0         0          ;15
+   13     for2u.i      0         4          ;15
+   14     rproc        1         0          ;16
+   15     ldadr        2         5          ;22
+   16     ldcon.i      0         1          ;23
+   17     ldcon.i      0       100          ;23
+   18     for1u.i      0        30          ;23
+   19     ldval.b      1         6          ;25
+   20     notop.b      0         0          ;25
+   21     jmpiz        0        23          ;25
+   22     jmpuc        0        19          ;25
+   23     ldval.i      1         5          ;26
+   24     wrval.i      0         0          ;26
+   25     wrlin        0         0          ;26
+   26     ldadr        1         6          ;26
+   27     ldcon.b      0         0          ;27
+   28     store.b      0         0          ;27
+   29     for2u.i      0        19          ;27
+   30     rproc        1         0          ;28
+   31     ldadr        2         5          ;34
+   32     ldcon.i      0         1          ;35
+   33     ldcon.i      0       100          ;35
+   34     for1u.i      0        54          ;35
+   35     ldval.b      1         6          ;37
+   36     notop.b      0         0          ;37
+   37     jmpiz        0        39          ;37
+   38     jmpuc        0        35          ;37
+   39     ldadr        1         7          ;38
+   40     swait        0         0          ;38
+   41     ldval.b      1         6          ;39
+   42     jmpiz        0        51          ;39
+   43     ldcon.i      0        13          ;41
+   44     wrstr        0         0          ;41
+   45     ldval.i      1         5          ;41
+   46     wrval.i      0         0          ;41
+   47     wrlin        0         0          ;41
+   48     ldadr        1         6          ;41
+   49     ldcon.b      0         0          ;42
+   50     store.b      0         0          ;42
+   51     ldadr        1         7          ;44
+   52     signl        0         0          ;44
+   53     for2u.i      0        35          ;44
+   54     rproc        1         0          ;45
+   55     ldadr        2         5          ;50
+   56     ldcon.i      0         1          ;51
+   57     ldcon.i      0       100          ;51
+   58     for1u.i      0        78          ;51
+   59     ldval.b      1         6          ;53
+   60     notop.b      0         0          ;53
+   61     jmpiz        0        63          ;53
+   62     jmpuc        0        59          ;53
+   63     ldadr        1         7          ;54
+   64     swait        0         0          ;54
+   65     ldval.b      1         6          ;55
+   66     jmpiz        0        75          ;55
+   67     ldcon.i      0        13          ;57
+   68     wrstr        0        13          ;57
+   69     ldval.i      1         5          ;57
+   70     wrval.i      0         0          ;57
+   71     wrlin        0         0          ;57
+   72     ldadr        1         6          ;57
+   73     ldcon.b      0         0          ;58
+   74     store.b      0         0          ;58
+   75     ldadr        1         7          ;60
+   76     signl        0         0          ;60
+   77     for2u.i      0        59          ;60
+   78     rproc        1         0          ;61
+   79     ldadr        1         6          ;67
+   80     ldcon.b      0         0          ;68
+   81     store.b      0         0          ;68
+   82     ldadr        1         7          ;69
+   83     ldcon.i      0         1          ;69
+   84     lobnd.i      0         0          ;69
+   85     sinit        0         0          ;69
+   86     cobeg        0         0          ;69
+   87     mkstk        1        51          ;70
+   88     ldadr        1         8          ;70
+   89     procv        0         0          ;70
+   90     calls        1         4          ;70
+   91     mkstk        1        57          ;71
+   92     ldadr        1        10          ;71
+   93     procv        0         0          ;71
+   94     calls        1         4          ;71
+   95     mkstk        1        60          ;72
+   96     ldadr        1        11          ;72
+   97     procv        0         0          ;72
+   98     calls        1         4          ;72
+   99     coend        0         0          ;73
+  100     stopx        0         0          ;74

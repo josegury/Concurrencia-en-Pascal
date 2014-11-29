@@ -1,0 +1,104 @@
+
+
+{problema fumadores de tabaco liado, para N fumadores N>=3}
+{se utilizan semaforos para los mensajes que monitorizan el funcionamiento}
+
+{Miguel Ángel Galdón}
+
+program fumadoM; 
+ 
+const 
+ maxfumadores=5;
+var
+ mutex : semaphore;
+
+monitor mesa;
+ 
+ export cojoIng,ponIng,termino; 
+ var 
+  liado : condition;
+  tengo : array[1..3] of condition;
+    
+ ing1,ing2 : integer;
+ mesavacia, liando : boolean;
+  
+ procedure cojoIng(ing: integer);
+  begin
+    if ((ing=ing1) or (ing=ing2) or mesavacia ) then
+     delay (tengo[ing]);
+    mesavacia := true;
+  end;
+   
+ procedure termino;
+  begin
+   resume(liado);
+  end;
+ 
+ procedure ponIng;
+ var i : integer;
+ begin
+  repeat
+  ing1:=random(2)+1;
+  repeat 
+   ing2:=random(2)+1;
+  until ing1<> ing2;
+  mesavacia := false;
+  wait(mutex);
+  writeLN('Agente: pongo ',ing1, ' y ', ing2,' en la mesa');
+  signal(mutex);
+  for i := 1 to 3 do
+   if (i<>ing1)and(i<>ing2)then
+     resume(tengo[i]);
+  delay(liado);
+  forever;
+ end; 
+
+begin {cuerpo monitor}
+ mesavacia := true;
+ liando := false;
+end;
+
+process type tfumador(id:integer);
+ var ing : integer;
+begin
+  if id < 4 then ing := id {a los 3 primeros les damos un ingrediente distinto}
+  else
+   ing:=random(2)+1; {a los demás aleatorio}
+  wait(mutex);
+  writeln('Fumador ',id,': tengo ',ing);
+  signal(mutex);
+ repeat
+  mesa.cojoIng(ing);
+  wait(mutex);
+  writeln('Fumador ',id,': liando...');
+  signal(mutex);
+  sleep(5); {liando...}
+  wait(mutex);
+  writeln('Fumador ',id,': ha terminado');
+  signal(mutex);
+  mesa.termino;
+ forever
+end;
+
+process agente;
+ 
+ begin
+   mesa.ponIng;
+ end;
+
+
+
+var fumadores:array[1..maxfumadores]of tfumador;
+
+ var j : integer;
+ begin
+  initial(mutex,1);
+  wait(mutex);
+  writeLN(' Ingredientes : 1-Tabaco, 2-Papel, 3-cerillas');
+  signal(mutex);
+  cobegin
+   agente;
+   for j:=1 to maxfumadores do
+     fumadores[j](j);
+  coend;
+ end.

@@ -1,0 +1,50 @@
+Pascal-FC post-mortem report on prog
+- Interpreter Version P5.3 - 
+Abnormal halt in process c1 with pc = 42
+Reason:   deadlock
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process p
+
+Status:  active
+pc = 6
+
+Process suspended on:
+
+buffer.lleno (condition)
+
+
+----------
+Process c1
+
+Status:  active
+pc = 42
+
+Process suspended on:
+
+buffer.vacio (condition)
+
+
+----------
+Process c2
+
+Status:  active
+pc = 42
+
+Process suspended on:
+
+buffer.vacio (condition)
+
+
+
+==========
+Global variables
+
+(None)

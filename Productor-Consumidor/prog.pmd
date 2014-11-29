@@ -1,0 +1,39 @@
+Pascal-FC post-mortem report on prog
+- Interpreter Version P5.3 - 
+Abnormal halt in process consdos with pc = 37
+Reason:   statement limit of 200000 reached (possible livelock)
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process productor
+
+Status:  terminated
+
+
+----------
+Process consdos
+
+Status:  active
+pc = 37
+
+
+----------
+Process constres
+
+Status:  active
+pc = 60
+
+
+
+==========
+Global variables
+
+mutex      = 1
+producido  = False
+dato       = 100

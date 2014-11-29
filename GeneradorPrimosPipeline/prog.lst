@@ -1,0 +1,111 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 const N = 5;
+    3     0 type tcEntero = channel of integer;
+    4     0   tcPipe = array [1..N+1] of tcEntero;
+***********                       ^28 
+    5     0   tcOutPut = array[1..N] of tcEntero;
+    6     0 
+    7     0 process numbers(var out:tcEntero);
+    8     0  var i:integer;
+    9     0 begin
+   10     0  i:=2;
+   11     3  repeat
+   12     3   out ! i;
+   13     6   i:=i+1;
+   14    11  forever;
+   15    12 end;
+   16    13 
+   17    13 process salida(var outs:tcOutPut);
+   18    13 var i, num : integer;
+   19    13 begin
+   20    13  for i:=1 to N do
+   21    17  begin
+   22    17   outs[i] ? num;
+   23    22   writeln(num);
+   24    25  end;
+   25    26 end;
+   26    27 
+   27    27 process consum(var into:tcEntero);
+   28    27  var i:integer;
+   29    27 begin
+   30    27  repeat
+   31    27   into ? i;
+   32    30  forever;
+   33    31 end;
+   34    32 {MAIN}
+   35    32 begin
+   36    32 
+   37    32 end.
+
+ Error diagnostics
+
+E28 -  unexpected symbol
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   32    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 n            46     constant    integer         0     False    1    5    0
+ 48 tcentero     47     type id     channel         1     False    1    3    0
+ 49 tcpipe       48     type id     array           1     False    1   15    0
+ 50 tcoutput     49     type id     array           2     False    1   15    0
+ 51 numbers      50     variable    process         3      True    1    5    0
+ 52 $            51     type id     process         3      True    1    0    0
+ 53 out           0     variable    channel         1     False    2    5    0
+ 54 i            53     variable    integer         0      True    2    6    0
+ 55 salida       52     variable    process         4      True    1    6    0
+ 56 $            55     type id     process         4      True    1   13    0
+ 57 outs          0     variable    array           2     False    2    5    0
+ 58 i            57     variable    integer         0      True    2    6    0
+ 59 num          58     variable    integer         0      True    2    7    0
+ 60 consum       56     variable    process         5      True    1    7    0
+ 61 $            60     type id     process         5      True    1   27    0
+ 62 into          0     variable    channel         1     False    2    5    0
+ 63 i            62     variable    integer         0      True    2    6    0
+
+Generated P-code
+
+    0     ldadr        2         6          ;9
+    1     ldcon.i      0         2          ;10
+    2     store.i      0         0          ;10
+    3     ldval.adr    2         5          ;11
+    4     ldval.i      2         6          ;12
+    5     chnwr.i      0         1          ;12
+    6     ldadr        2         6          ;12
+    7     ldval.i      2         6          ;13
+    8     ldcon.i      0         1          ;13
+    9     addop.i      0         0          ;13
+   10     store.i      0         0          ;13
+   11     jmpuc        0         3          ;13
+   12     rproc        1         0          ;14
+   13     ldadr        2         6          ;19
+   14     ldcon.i      0         1          ;20
+   15     ldcon.i      0         5          ;20
+   16     for1u.i      0        26          ;20
+   17     ldval.adr    2         5          ;21
+   18     ldval.i      2         6          ;22
+   19     ixary.i      0         2          ;22
+   20     ldadr        2         7          ;22
+   21     chnrd        0         1          ;22
+   22     ldval.i      2         7          ;23
+   23     wrval.i      0         0          ;23
+   24     wrlin        0         0          ;23
+   25     for2u.i      0        17          ;23
+   26     rproc        1         0          ;24
+   27     ldval.adr    2         5          ;30
+   28     ldadr        2         6          ;31
+   29     chnrd        0         1          ;31
+   30     jmpuc        0        27          ;31
+   31     rproc        1         0          ;32
+   32     stopx        0         0          ;35

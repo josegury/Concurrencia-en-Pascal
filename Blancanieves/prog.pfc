@@ -1,0 +1,89 @@
+program prog;
+const numEnanitos = 7;
+	  numSillas = 4;
+type canal = channel of synchronous;	
+ 	 canales = array[0..numEnanitos] of canal;
+monitor casa;
+	export comer,sentarse,levantarse,vuelta,ponerPlato;
+	var sillas : integer;
+		esperaSilla : condition;
+		
+	procedure sentarse(id:integer);
+	begin
+		if sillas = 0 then
+			delay(esperaSilla);
+		writeln('El enano cabron ',id, ' se ha sentado');
+		sillas:=sillas-1;
+		
+	end;
+	
+	procedure comer(id:integer);
+	begin
+		writeln('El enano cabron ',id, 'esta comiendo...');
+	end;
+	
+	procedure levantarse(id:integer);
+	begin
+		writeln('El enano cabron ',id, 'se ha levantado');
+		sillas := sillas + 1;
+		resume(esperaSilla);{despierto a un enanito}
+	end;
+	
+	
+	procedure ponerPlato;
+	begin
+		writeln('El plato esta servido');
+	end;
+	
+	procedure vuelta;
+	begin
+		writeln('Blancanieves esta paseando');
+	end;
+	
+{CUERPO MONITOR}
+begin
+sillas:=numSillas;
+end;
+{FIN MONITOR}
+
+process type enano(id:integer;var ch : canal);
+begin
+	repeat
+		sleep(5);{el eneano esta trabajando}
+		casa.sentarse(id);
+		ch ! any;{le dice a blanca que se a sentado}
+		ch ? any;{cuando le pone el plato en la mesa}
+		casa.comer(id);
+		sleep(random(5));{el enanito esta comiendo}
+		casa.levantarse(id);
+	forever;
+end;
+
+process blanca(var chs : canales);
+	var cont : integer;
+begin
+	repeat
+		select
+			for cont := 0 to numEnanitos replicate
+			 	chs[cont] ? any;{le dice el enanito que se ha sentado}				
+			 	casa.ponerPlato;{ponel el plato al enanito}
+			 	chs[cont] ! any;{le dice al enano que a puesto el plato}
+		else{si no recibe mensage se pira}
+			casa.vuelta;
+			sleep(5);{blanca esta paseando}
+			
+		end;
+	forever;
+end;
+
+var chs : canales;
+	enanitos : array[0..numEnanitos] of enano;
+	i:integer;
+begin
+	cobegin
+		blanca(chs);
+		for i:=0 to numEnanitos do
+			enanitos[i](i,chs[i]);
+	coend;
+
+end.

@@ -1,0 +1,301 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program Peatones;
+    2     0 
+    3     0 
+    4     0 
+    5     0 monitor control;
+    6     0 
+    7     0 export llegaPeaton,salePeaton,llegaCoche,saleCoche;
+    8     0 
+    9     0 
+   10     0 var 
+   11     0 NPeatones,NAzules : integer;
+   12     0 cochePasando : boolean;
+   13     0 coche,peaton: condition;
+   14     0 
+   15     0 procedure llegaPeaton(id : integer); {id identifica al peatón}
+   16     0 
+   17     0 begin
+   18     0  if (cochePasando)  then
+   19     2  begin
+   20     2   writeln('peaton, ',id,' espera');
+   21     9   delay (peaton);
+   22    11  end;
+   23    11  
+   24    11  writeln('peaton,' ,id,' esta cruzando');
+   25    18  NPeatones := NPeatones+1;
+   26    23  resume(peaton); (*desbloquemos en cadena al resto de peatones*)
+   27    25 end;
+   28    26 
+   29    26 procedure salePeaton(id : integer); {id identifica al peatón}
+   30    26 begin
+   31    26  writeln('peaton, ',id,' ha pasado');
+   32    33  NPeatones := NPeatones-1;
+   33    38  if (NPeatones = 0)  then  (*desbloqueamos un coche si no quedan peatones dentro*)
+   34    42   resume(coche)
+   35    44 end;
+   36    45 
+   37    45 procedure llegaCoche(id : integer); {id identifica al coche}
+   38    45 begin
+   39    45  if ((NPeatones <> 0) or cochePasando)  then
+   40    51  begin
+   41    51   writeln('  coche, ',id,' espera');
+   42    58   delay (coche);
+   43    60  end;
+   44    60  writeln('  coche, ',id,' entra al paso de peatones');
+   45    67  cochePasando := true;
+   46    70 end;
+   47    71 
+   48    71 
+   49    71 procedure saleCoche(id : integer);
+   50    71 begin
+   51    71  cochePasando := false;
+   52    74  writeln('  coche, ',id,' ha pasado');
+   53    81   if not empty(peaton) then resume(peaton)
+   54    87   else resume (coche);
+   55    90 end;
+   56    91 
+   57    91 
+   58    91 begin { cuerpo monitor}
+   59    92  NPeatones :=0; 
+   60    95  cochePasando := false;
+   61    98 end;
+   62    99 
+   63    99 process type Tcoche(id : integer);
+   64    99 begin
+   65    99  if (id mod 2 = 0) then
+   66   105    sleep( Random(5)); { algunos llegan después}
+   67   108  
+   68   108  control.llegaCoche(id);
+   69   114  sleep(random(1)); {tiempo que tarda en pasar}
+   70   117  control.saleCoche(id);
+   71   123 end;
+   72   124 
+   73   124 process type Tpeaton(id : integer);
+   74   124 begin
+   75   124  sleep(random(20)); { para que no lleguen todos a la vez}
+   76   127  control.llegaPeaton(id);
+   77   133  sleep(random(5)); {Cruzando el paso}
+   78   136  control.salePeaton(id);
+   79   142 end;
+   80   143 
+   81   143 var peaton:  array[1..10] of Tpeaton;
+   82   143  coche:  array[1..10] of Tcoche;
+   83   143  i : integer;
+   84   143 
+   85   143 begin
+   86   144  cobegin
+   87   145  for i := 1 to 10 do
+   88   149   begin
+   89   149      peaton[i](i);
+   90   156      coche[i](i);
+   91   163   end;
+   92   164  coend;
+   93   165 
+   94   165 
+   95   165 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0  143    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 control      46     variable    monvar          3      True    1    5   91
+ 48 npeatones     0     variable    integer         0      True    1    7    0
+ 49 nazules      48     variable    integer         0      True    1    8    0
+ 50 cochepasan   49     variable    boolean         0      True    1    9    0
+ 51 coche        50     variable    condition       0      True    1   10    0
+ 52 peaton       51     variable    condition       0      True    1   11    0
+ 53 llegapeato   52     monproc     notyp           4      True    2    0    0
+ 54 id            0     variable    integer         0      True    3    5    0
+ 55 salepeaton   53     monproc     notyp           5      True    2   26    0
+ 56 id            0     variable    integer         0      True    3    5    0
+ 57 llegacoche   55     monproc     notyp           6      True    2   45    0
+ 58 id            0     variable    integer         0      True    3    5    0
+ 59 salecoche    57     monproc     notyp           7      True    2   71    0
+ 60 id            0     variable    integer         0      True    3    5    0
+ 61 tcoche       47     type id     process         8      True    1   99    0
+ 62 id            0     variable    integer         0      True    2    5    0
+ 63 tpeaton      61     type id     process         9      True    1  124    0
+ 64 id            0     variable    integer         0      True    2    5    0
+ 65 peaton       63     variable    array           1      True    1   12    0
+ 66 coche        65     variable    array           2      True    1   22    0
+ 67 i            66     variable    integer         0      True    1   32    0
+
+Generated P-code
+
+    0     ldval.b      1         9          ;18
+    1     jmpiz        0        11          ;18
+    2     ldcon.i      0         8          ;20
+    3     wrstr        0         0          ;20
+    4     ldval.i      3         5          ;20
+    5     wrval.i      0         0          ;20
+    6     ldcon.i      0         7          ;20
+    7     wrstr        0         8          ;20
+    8     wrlin        0         0          ;20
+    9     ldadr        1        11          ;21
+   10     delay        0         0          ;21
+   11     ldcon.i      0         7          ;24
+   12     wrstr        0        15          ;24
+   13     ldval.i      3         5          ;24
+   14     wrval.i      0         0          ;24
+   15     ldcon.i      0        14          ;24
+   16     wrstr        0        22          ;24
+   17     wrlin        0         0          ;24
+   18     ldadr        1         7          ;24
+   19     ldval.i      1         7          ;25
+   20     ldcon.i      0         1          ;25
+   21     addop.i      0         0          ;25
+   22     store.i      0         0          ;25
+   23     ldadr        1        11          ;26
+   24     resum        0         0          ;26
+   25     rproc        0         0          ;26
+   26     ldcon.i      0         8          ;31
+   27     wrstr        0        36          ;31
+   28     ldval.i      3         5          ;31
+   29     wrval.i      0         0          ;31
+   30     ldcon.i      0        10          ;31
+   31     wrstr        0        44          ;31
+   32     wrlin        0         0          ;31
+   33     ldadr        1         7          ;31
+   34     ldval.i      1         7          ;32
+   35     ldcon.i      0         1          ;32
+   36     subop.i      0         0          ;32
+   37     store.i      0         0          ;32
+   38     ldval.i      1         7          ;33
+   39     ldcon.i      0         0          ;33
+   40     releq.i      0         0          ;33
+   41     jmpiz        0        44          ;33
+   42     ldadr        1        10          ;34
+   43     resum        0         0          ;34
+   44     rproc        0         0          ;34
+   45     ldval.i      1         7          ;39
+   46     ldcon.i      0         0          ;39
+   47     relne.i      0         0          ;39
+   48     ldval.b      1         9          ;39
+   49     iorop.b      0         0          ;39
+   50     jmpiz        0        60          ;39
+   51     ldcon.i      0         9          ;41
+   52     wrstr        0        54          ;41
+   53     ldval.i      3         5          ;41
+   54     wrval.i      0         0          ;41
+   55     ldcon.i      0         7          ;41
+   56     wrstr        0        63          ;41
+   57     wrlin        0         0          ;41
+   58     ldadr        1        10          ;42
+   59     delay        0         0          ;42
+   60     ldcon.i      0         9          ;44
+   61     wrstr        0        70          ;44
+   62     ldval.i      3         5          ;44
+   63     wrval.i      0         0          ;44
+   64     ldcon.i      0        26          ;44
+   65     wrstr        0        79          ;44
+   66     wrlin        0         0          ;44
+   67     ldadr        1         9          ;44
+   68     ldcon.b      0         1          ;45
+   69     store.b      0         0          ;45
+   70     rproc        0         0          ;45
+   71     ldadr        1         9          ;50
+   72     ldcon.b      0         0          ;51
+   73     store.b      0         0          ;51
+   74     ldcon.i      0         9          ;52
+   75     wrstr        0       105          ;52
+   76     ldval.i      3         5          ;52
+   77     wrval.i      0         0          ;52
+   78     ldcon.i      0        10          ;52
+   79     wrstr        0       114          ;52
+   80     wrlin        0         0          ;52
+   81     ldadr        1        11          ;53
+   82     stfun.b      0        20          ;53
+   83     notop.b      0         0          ;53
+   84     jmpiz        0        88          ;53
+   85     ldadr        1        11          ;53
+   86     resum        0         0          ;53
+   87     jmpuc        0        90          ;53
+   88     ldadr        1        10          ;54
+   89     resum        0         0          ;54
+   90     rproc        0         0          ;54
+   91     prsel        0         0          ;55
+   92     ldadr        1         7          ;58
+   93     ldcon.i      0         0          ;59
+   94     store.i      0         0          ;59
+   95     ldadr        1         9          ;59
+   96     ldcon.b      0         0          ;60
+   97     store.b      0         0          ;60
+   98     mretn        0         0          ;60
+   99     ldval.i      2         5          ;65
+  100     ldcon.i      0         2          ;65
+  101     modop.i      0         0          ;65
+  102     ldcon.i      0         0          ;65
+  103     releq.i      0         0          ;65
+  104     jmpiz        0       108          ;65
+  105     ldcon.i      0         5          ;66
+  106     stfun.i      0        19          ;66
+  107     sleep        0         0          ;66
+  108     ldadr        1         5          ;68
+  109     enmon        0         0          ;68
+  110     mkstk        0        57          ;68
+  111     ldval.i      2         5          ;68
+  112     calls        0         5          ;68
+  113     exmon        0         0          ;68
+  114     ldcon.i      0         1          ;69
+  115     stfun.i      0        19          ;69
+  116     sleep        0         0          ;69
+  117     ldadr        1         5          ;70
+  118     enmon        0         0          ;70
+  119     mkstk        0        59          ;70
+  120     ldval.i      2         5          ;70
+  121     calls        0         5          ;70
+  122     exmon        0         0          ;70
+  123     rproc        1         0          ;70
+  124     ldcon.i      0        20          ;75
+  125     stfun.i      0        19          ;75
+  126     sleep        0         0          ;75
+  127     ldadr        1         5          ;76
+  128     enmon        0         0          ;76
+  129     mkstk        0        53          ;76
+  130     ldval.i      2         5          ;76
+  131     calls        0         5          ;76
+  132     exmon        0         0          ;76
+  133     ldcon.i      0         5          ;77
+  134     stfun.i      0        19          ;77
+  135     sleep        0         0          ;77
+  136     ldadr        1         5          ;78
+  137     enmon        0         0          ;78
+  138     mkstk        0        55          ;78
+  139     ldval.i      2         5          ;78
+  140     calls        0         5          ;78
+  141     exmon        0         0          ;78
+  142     rproc        1         0          ;78
+  143     mexec        0        92          ;83
+  144     cobeg        0         0          ;83
+  145     ldadr        1        32          ;86
+  146     ldcon.i      0         1          ;87
+  147     ldcon.i      0        10          ;87
+  148     for1u.i      0       164          ;87
+  149     mkstk        1        63          ;88
+  150     ldadr        1        12          ;88
+  151     ldval.i      1        32          ;89
+  152     ixary.i      0         1          ;89
+  153     procv        0         0          ;89
+  154     ldval.i      1        32          ;89
+  155     calls        1         5          ;89
+  156     mkstk        1        61          ;89
+  157     ldadr        1        22          ;89
+  158     ldval.i      1        32          ;90
+  159     ixary.i      0         2          ;90
+  160     procv        0         0          ;90
+  161     ldval.i      1        32          ;90
+  162     calls        1         5          ;90
+  163     for2u.i      0       149          ;90
+  164     coend        0         0          ;91
+  165     stopx        0         0          ;92

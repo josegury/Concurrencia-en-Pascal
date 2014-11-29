@@ -1,0 +1,95 @@
+program Peatones;
+
+
+
+monitor control;
+
+export llegaPeaton,salePeaton,llegaCoche,saleCoche;
+
+
+var 
+NPeatones,NAzules : integer;
+cochePasando : boolean;
+coche,peaton: condition;
+
+procedure llegaPeaton(id : integer); {id identifica al peatón}
+
+begin
+ if (cochePasando)  then
+ begin
+  writeln('peaton, ',id,' espera');
+  delay (peaton);
+ end;
+ 
+ writeln('peaton,' ,id,' esta cruzando');
+ NPeatones := NPeatones+1;
+ resume(peaton); (*desbloquemos en cadena al resto de peatones*)
+end;
+
+procedure salePeaton(id : integer); {id identifica al peatón}
+begin
+ writeln('peaton, ',id,' ha pasado');
+ NPeatones := NPeatones-1;
+ if (NPeatones = 0)  then  (*desbloqueamos un coche si no quedan peatones dentro*)
+  resume(coche)
+end;
+
+procedure llegaCoche(id : integer); {id identifica al coche}
+begin
+ if ((NPeatones <> 0) or cochePasando)  then
+ begin
+  writeln('		coche, ',id,' espera');
+  delay (coche);
+ end;
+ writeln('		coche, ',id,' entra al paso de peatones');
+ cochePasando := true;
+end;
+
+
+procedure saleCoche(id : integer);
+begin
+ cochePasando := false;
+ writeln('		coche, ',id,' ha pasado');
+  if not empty(peaton) then resume(peaton)
+  else resume (coche);
+end;
+
+
+begin { cuerpo monitor}
+ NPeatones :=0; 
+ cochePasando := false;
+end;
+
+process type Tcoche(id : integer);
+begin
+ if (id mod 2 = 0) then
+   sleep( Random(5)); { algunos llegan después}
+ 
+ control.llegaCoche(id);
+ sleep(random(1)); {tiempo que tarda en pasar}
+ control.saleCoche(id);
+end;
+
+process type Tpeaton(id : integer);
+begin
+ sleep(random(20)); { para que no lleguen todos a la vez}
+ control.llegaPeaton(id);
+ sleep(random(5)); {Cruzando el paso}
+ control.salePeaton(id);
+end;
+
+var peaton:  array[1..10] of Tpeaton;
+	coche:  array[1..10] of Tcoche;
+	i : integer;
+
+begin
+ cobegin
+ for i := 1 to 10 do
+  begin
+     peaton[i](i);
+     coche[i](i);
+  end;
+ coend;
+
+
+end.

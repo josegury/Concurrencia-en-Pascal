@@ -1,0 +1,47 @@
+Pascal-FC post-mortem report on prog
+- Interpreter Version P5.3 - 
+Abnormal halt in process c1 with pc = 39
+Reason:   deadlock
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process c1
+
+Status:  active
+pc = 39
+
+Process suspended on:
+
+lleno (semaphore)
+
+
+----------
+Process productor
+
+Status:  terminated
+
+
+----------
+Process c2
+
+Status:  active
+pc = 39
+
+Process suspended on:
+
+lleno (semaphore)
+
+
+
+==========
+Global variables
+
+vacio      = 100
+lleno      = 0
+mutex      = 1

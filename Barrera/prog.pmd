@@ -1,0 +1,47 @@
+Pascal-FC post-mortem report on prog
+- Interpreter Version P5.3 - 
+Abnormal halt in process p[2] with pc = 63
+Reason:   statement limit of 200000 reached (possible livelock)
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process p[1]
+
+Status:  active
+pc = 64
+
+Process suspended on:
+
+barrera (semaphore)
+
+
+----------
+Process p[2]
+
+Status:  active
+pc = 63
+
+
+----------
+Process p[3]
+
+Status:  active
+pc = 38
+
+
+
+==========
+Global variables
+
+i          = 3
+mutex2     = 1
+barrera2   = 0
+mutex      = 0
+barrera    = 0
+np         = 2

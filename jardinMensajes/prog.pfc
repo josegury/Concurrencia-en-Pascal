@@ -1,0 +1,42 @@
+program prog;
+type TPath = channel of integer;
+var paths : array [1..2] of TPath;
+
+process type Ttornos (id:integer);
+	var i: integer;
+
+begin
+	for i:=1 to 20 do
+	begin
+		paths[id] ! 1;
+	end;
+end;
+
+process contador;
+var count : integer;
+	i,j,temp : integer;
+begin
+	count :=0;
+	for i:=1 to 20 do
+	begin
+		paths[1] ? temp;
+		count := count + temp;
+		paths[2] ? temp;
+		count := count + temp;
+	end;
+	writeln('total admitidos: ', count);
+end;
+
+{MAIN}
+
+var torno : array[1..2] of Ttornos;
+	i : integer;
+begin { PPal}
+	cobegin
+		for i:= 1 to 2 do
+		begin
+			torno[i](i);
+		end;
+		contador;
+	coend;
+end.

@@ -1,0 +1,96 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 
+    3     0 type canalInt = channel of integer;
+    4     0 var ch1 : canalInt;
+    5     0 
+    6     0 process p;
+    7     0 var i : integer;
+    8     0 begin
+    9     0  for i:=1 to 20 do
+   10     4  begin
+   11     4   if (i mod 2)<> 0 then 
+   12    10   begin
+   13    10    ch1 ! i; {envia un dato entero pos el canal ch1}
+   14    13    sleep(1);
+   15    15   end;
+   16    15  end;
+   17    16 end;
+   18    17 
+   19    17 process q;
+   20    17  var item : integer;
+   21    17 begin
+   22    17  repeat ch1 ? item; {recibe el mensaje del canal ch1 y lo guarda en item}
+   23    20   writeln(item);
+   24    23  forever;
+   25    24 end;
+   26    25 
+   27    25 begin
+   28    25 
+   29    25  cobegin
+   30    26   p;
+   31    30   q;
+   32    34  coend;
+   33    35 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   25    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 canalint     46     type id     channel         1     False    1    3    0
+ 48 ch1          47     variable    channel         1      True    1    5    0
+ 49 p            48     variable    process         3      True    1    8    0
+ 50 $            49     type id     process         3      True    1    0    0
+ 51 i             0     variable    integer         0      True    2    5    0
+ 52 q            50     variable    process         4      True    1    9    0
+ 53 $            52     type id     process         4      True    1   17    0
+ 54 item          0     variable    integer         0      True    2    5    0
+
+Generated P-code
+
+    0     ldadr        2         5          ;8
+    1     ldcon.i      0         1          ;9
+    2     ldcon.i      0        20          ;9
+    3     for1u.i      0        16          ;9
+    4     ldval.i      2         5          ;11
+    5     ldcon.i      0         2          ;11
+    6     modop.i      0         0          ;11
+    7     ldcon.i      0         0          ;11
+    8     relne.i      0         0          ;11
+    9     jmpiz        0        15          ;11
+   10     ldadr        1         5          ;12
+   11     ldval.i      2         5          ;13
+   12     chnwr.i      0         1          ;13
+   13     ldcon.i      0         1          ;14
+   14     sleep        0         0          ;14
+   15     for2u.i      0         4          ;15
+   16     rproc        1         0          ;16
+   17     ldadr        1         5          ;22
+   18     ldadr        2         5          ;22
+   19     chnrd        0         1          ;22
+   20     ldval.i      2         5          ;23
+   21     wrval.i      0         0          ;23
+   22     wrlin        0         0          ;23
+   23     jmpuc        0        17          ;23
+   24     rproc        1         0          ;24
+   25     cobeg        0         0          ;25
+   26     mkstk        1        50          ;29
+   27     ldadr        1         8          ;29
+   28     procv        0         0          ;29
+   29     calls        1         4          ;29
+   30     mkstk        1        53          ;30
+   31     ldadr        1         9          ;30
+   32     procv        0         0          ;30
+   33     calls        1         4          ;30
+   34     coend        0         0          ;31
+   35     stopx        0         0          ;32

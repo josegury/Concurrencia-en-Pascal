@@ -1,0 +1,57 @@
+program prog;
+monitor ascensor;
+	export entra,sale,avanzar,abrirPuerta;
+		
+		const capacidad=4;{capacidad total del jardin}
+			  NPlantas=5;
+		var ocupado : integer;
+			Eplanta : array [1..NPlantas] of condition;	
+			Splanta : array [1..NPlantas] of condition;	
+			pisoActual : integer;
+			
+	{procesos del ascensor}
+{-------------------Terminar------------}
+	procedure avanzar;
+	begin
+	end;
+	
+	procedure abrirPuerta;
+		{dejar entrar
+		dejar salir
+		si el ascensor esta en la planta tres, se desbloquean todos los procesos con destino, bloqueados en la planta 3}
+	begin
+	end;
+{----------------------------------------}	
+	{Procesos de las personas}
+	procedure entra(id,origen : integer);
+	begin 
+		if(origen <> pisoActual or ocupado = capacidad) then
+		begin
+			{utiliza el array de condiciones para saber que procesos parar}
+			delay(Eplanta[origen]);{si el ascensor esta lleno, el proceso que ejecuta el delay es bloqueado, hasta encontrar un resume}
+		end;
+		writeLN('Persona ',id,' entra al ascensor');
+		ocupado:=ocupado+1;
+	end;
+	
+	
+	procedure sale(id,destino : integer);{la persona sale del jardin (monitor)}
+	begin
+		if(destino <> pisoActual) then
+		begin
+			delay(splanta[destino]){si la planta actual no es la de destino, se bloquea al proceso}
+		end;
+		writeLN('  Persona ',id,' sale del ascensor');
+		ocupado:=ocupado-1;
+	end;
+
+{Cuero monitor}
+begin
+	ocupado:=0;
+	pisoActual:=0;
+end;
+
+{Main}
+begin
+
+end.

@@ -1,0 +1,66 @@
+program aseosMixtos;
+monitor bater;
+	export mear,mearSentada,dejarmearHombre,dejarmearMujer;
+	var hombres,mujeres : condition;
+		nMujeres,nHombres : integer;
+		
+	procedure mear(id:integer);
+	begin
+		while nMujeres > 0 do
+			delay(hombres);
+		nHombres := nHombres + 1;
+		writeln('El hombre',id,'Esta meando y no esta apuntando');
+	end;
+	
+	procedure mearSentada(id:integer);
+	begin
+		while nHombres > 0 do
+			delay(mujeres);
+		nMujeres := nMujeres + 1;
+		writeln('La mujer',id,' se ha sentado en los meaos de los tios');
+	end;
+	
+	procedure dejarmearHombre(id:integer);
+	begin
+		nHombres := nHombres - 1;
+		writeln('El hombre',id,'se pira del bater');
+		while (not empty(mujeres)) and (nhombres = 0) do
+			resume(mujeres);
+	end;
+	
+	procedure dejarmearMujer(id:integer);
+	begin
+		nMujeres := nMujeres - 1;
+		writeln('La mujer',id,'se pira del bater');
+		while (not empty(hombres)) and (nMujeres = 0) do
+			resume(hombres);
+	end;
+	
+begin
+end;
+
+
+process type hombre(id:integer);
+begin
+	bater.mear(id);
+	bater.dejarmearHombre(id);
+end;
+
+process type mujer(id:integer);
+begin
+	bater.mearSentada(id);
+	bater.dejarmearMujer(id);
+end;
+
+var i: integer;
+	hombres : array[0..5] of hombre;
+	mujeres : array[0..5] of mujer;
+begin
+	cobegin
+		for i:=0 to 5 do
+		begin
+			hombres[i](i);
+			mujeres[i](i);
+		end;
+	coend;
+end.

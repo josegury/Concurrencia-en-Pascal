@@ -1,0 +1,296 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 
+    3     0 {escribir tres A y B, sabiendo que cada proceso puede escribir una A y una B}
+    4     0 
+    5     0 const ntp = 3;
+    6     0 var cont : integer;
+    7     0  barrera, mutex : semaphore;
+    8     0  {para el reentrante: }
+    9     0  torno1: semaphore; 
+   10     0  torno2: semaphore; 
+   11     0  
+   12     0  
+   13     0 process type Tprocesos;{mala solucion}
+   14     0 var i,j : integer;
+   15     0 begin
+   16     0  for j := 1 to 40 do
+   17     4  begin
+   18     4  
+   19     4   write('A');
+   20     6  
+   21     6   wait(mutex); { protejemos el contador con el semaforo }
+   22     8    cont:=cont+1; 
+   23    13    if ntp = cont then { si llega al ultimo proceso }
+   24    17    begin
+   25    17     for i := 1 to ntp do
+   26    21     begin
+   27    21      signal(barrera);
+   28    23     
+   29    23      wait(barrera); { si esta a cero, para y si esta a mas de cero, lo decrementa }
+   30    25     end;{fin 2º for}
+   31    26     cont:= 0;
+   32    29    end;{fin if}
+   33    29   signal(mutex); { solo un proceso accede a al contenido de esa seccion a la vez}
+   34    31   write('B');
+   35    33  end;{fin 1º bucle for}
+   36    34 end;
+   37    35 
+   38    35 process type tProceso; {buena solucion-- con tornos}
+   39    35  var  i:integer; 
+   40    35  
+   41    35  begin 
+   42    35   write('A'); 
+   43    37  
+   44    37   wait(mutex); 
+   45    39    cont := cont + 1; 
+   46    44    if cont = ntp then 
+   47    48    for i:=1 to ntp do 
+   48    52     signal(barrera); 
+   49    55   signal(mutex); 
+   50    57  
+   51    57   wait(barrera); 
+   52    59  
+   53    59  write('B'); 
+   54    61  end; 
+   55    62 
+   56    62 {reentrane con tornos}
+   57    62 
+   58    62 process type TprocesTorno; 
+   59    62  begin 
+   60    62  repeat 
+   61    62   write('A'); 
+   62    64   wait(mutex); 
+   63    66   cont := cont+1; 
+   64    71   if (cont=ntp) then 
+   65    75   begin 
+   66    75    wait(torno2); {bloquea el segundo torno} 
+   67    77    signal(torno1); {desbloquea el primero} 
+   68    79   end; 
+   69    79   signal(mutex); 
+   70    81  
+   71    81   wait(torno1); {primer torno} 
+   72    83   signal(torno1); 
+   73    85  
+   74    85   write('B'); {Punto crítico} 
+   75    87  
+   76    87   wait(mutex); 
+   77    89   cont := cont-1; 
+   78    94   if (cont=0) then 
+   79    98   begin 
+   80    98    wait(torno1); {bloquea el primero} 
+   81   100    signal(torno2); {desbloquea el segundo} 
+   82   102   end; 
+   83   102   signal(mutex); 
+   84   104  
+   85   104   wait(torno2); {segundo torno} 
+   86   106   signal(torno2); 
+   87   108  forever; 
+   88   109 end;
+   89   110 
+   90   110 (*MAIN*)
+   91   110 
+   92   110 var P1, P2,P3 : TprocesTorno;
+   93   110 
+   94   110 begin
+   95   110  {tProceso}
+   96   110  initial(barrera,0);(*inicio la barrera *)
+   97   114  initial(mutex,1);
+   98   118  
+   99   118  {tProcesos---tornos reutilizables}
+  100   118  initial(torno1,0); 
+  101   122  initial(torno2,1); 
+  102   126  initial(mutex,1); 
+  103   130  
+  104   130  cont:=0;
+  105   133  cobegin
+  106   134   P1;
+  107   138   P2;
+  108   142   P3;
+  109   146  coend;
+  110   147  write(barrera);
+  111   150 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0  110    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 ntp          46     constant    integer         0     False    1    3    0
+ 48 cont         47     variable    integer         0      True    1    5    0
+ 49 barrera      48     variable    semaphore       0      True    1    6    0
+ 50 mutex        49     variable    semaphore       0      True    1    7    0
+ 51 torno1       50     variable    semaphore       0      True    1    8    0
+ 52 torno2       51     variable    semaphore       0      True    1    9    0
+ 53 tprocesos    52     type id     process         3      True    1    0    0
+ 54 i             0     variable    integer         0      True    2    5    0
+ 55 j            54     variable    integer         0      True    2    6    0
+ 56 tproceso     53     type id     process         4      True    1   35    0
+ 57 i             0     variable    integer         0      True    2    5    0
+ 58 tprocestor   56     type id     process         5      True    1   62    0
+ 59 p1           58     variable    process         5      True    1   10    0
+ 60 p2           59     variable    process         5      True    1   11    0
+ 61 p3           60     variable    process         5      True    1   12    0
+
+Generated P-code
+
+    0     ldadr        2         6          ;15
+    1     ldcon.i      0         1          ;16
+    2     ldcon.i      0        40          ;16
+    3     for1u.i      0        34          ;16
+    4     ldcon.c      0        65          ;19
+    5     wrval.c      0         0          ;19
+    6     ldadr        1         7          ;21
+    7     swait        0         0          ;21
+    8     ldadr        1         5          ;21
+    9     ldval.i      1         5          ;22
+   10     ldcon.i      0         1          ;22
+   11     addop.i      0         0          ;22
+   12     store.i      0         0          ;22
+   13     ldcon.i      0         3          ;23
+   14     ldval.i      1         5          ;23
+   15     releq.i      0         0          ;23
+   16     jmpiz        0        29          ;23
+   17     ldadr        2         5          ;24
+   18     ldcon.i      0         1          ;25
+   19     ldcon.i      0         3          ;25
+   20     for1u.i      0        26          ;25
+   21     ldadr        1         6          ;27
+   22     signl        0         0          ;27
+   23     ldadr        1         6          ;29
+   24     swait        0         0          ;29
+   25     for2u.i      0        21          ;29
+   26     ldadr        1         5          ;30
+   27     ldcon.i      0         0          ;31
+   28     store.i      0         0          ;31
+   29     ldadr        1         7          ;33
+   30     signl        0         0          ;33
+   31     ldcon.c      0        66          ;34
+   32     wrval.c      0         0          ;34
+   33     for2u.i      0         4          ;34
+   34     rproc        1         0          ;35
+   35     ldcon.c      0        65          ;42
+   36     wrval.c      0         0          ;42
+   37     ldadr        1         7          ;44
+   38     swait        0         0          ;44
+   39     ldadr        1         5          ;44
+   40     ldval.i      1         5          ;45
+   41     ldcon.i      0         1          ;45
+   42     addop.i      0         0          ;45
+   43     store.i      0         0          ;45
+   44     ldval.i      1         5          ;46
+   45     ldcon.i      0         3          ;46
+   46     releq.i      0         0          ;46
+   47     jmpiz        0        55          ;46
+   48     ldadr        2         5          ;46
+   49     ldcon.i      0         1          ;47
+   50     ldcon.i      0         3          ;47
+   51     for1u.i      0        55          ;47
+   52     ldadr        1         6          ;48
+   53     signl        0         0          ;48
+   54     for2u.i      0        52          ;48
+   55     ldadr        1         7          ;49
+   56     signl        0         0          ;49
+   57     ldadr        1         6          ;51
+   58     swait        0         0          ;51
+   59     ldcon.c      0        66          ;53
+   60     wrval.c      0         0          ;53
+   61     rproc        1         0          ;53
+   62     ldcon.c      0        65          ;61
+   63     wrval.c      0         0          ;61
+   64     ldadr        1         7          ;62
+   65     swait        0         0          ;62
+   66     ldadr        1         5          ;62
+   67     ldval.i      1         5          ;63
+   68     ldcon.i      0         1          ;63
+   69     addop.i      0         0          ;63
+   70     store.i      0         0          ;63
+   71     ldval.i      1         5          ;64
+   72     ldcon.i      0         3          ;64
+   73     releq.i      0         0          ;64
+   74     jmpiz        0        79          ;64
+   75     ldadr        1         9          ;66
+   76     swait        0         0          ;66
+   77     ldadr        1         8          ;67
+   78     signl        0         0          ;67
+   79     ldadr        1         7          ;69
+   80     signl        0         0          ;69
+   81     ldadr        1         8          ;71
+   82     swait        0         0          ;71
+   83     ldadr        1         8          ;72
+   84     signl        0         0          ;72
+   85     ldcon.c      0        66          ;74
+   86     wrval.c      0         0          ;74
+   87     ldadr        1         7          ;76
+   88     swait        0         0          ;76
+   89     ldadr        1         5          ;76
+   90     ldval.i      1         5          ;77
+   91     ldcon.i      0         1          ;77
+   92     subop.i      0         0          ;77
+   93     store.i      0         0          ;77
+   94     ldval.i      1         5          ;78
+   95     ldcon.i      0         0          ;78
+   96     releq.i      0         0          ;78
+   97     jmpiz        0       102          ;78
+   98     ldadr        1         8          ;80
+   99     swait        0         0          ;80
+  100     ldadr        1         9          ;81
+  101     signl        0         0          ;81
+  102     ldadr        1         7          ;83
+  103     signl        0         0          ;83
+  104     ldadr        1         9          ;85
+  105     swait        0         0          ;85
+  106     ldadr        1         9          ;86
+  107     signl        0         0          ;86
+  108     jmpuc        0        62          ;86
+  109     rproc        1         0          ;87
+  110     ldadr        1         6          ;96
+  111     ldcon.i      0         0          ;96
+  112     lobnd.i      0         0          ;96
+  113     sinit        0         0          ;96
+  114     ldadr        1         7          ;97
+  115     ldcon.i      0         1          ;97
+  116     lobnd.i      0         0          ;97
+  117     sinit        0         0          ;97
+  118     ldadr        1         8          ;100
+  119     ldcon.i      0         0          ;100
+  120     lobnd.i      0         0          ;100
+  121     sinit        0         0          ;100
+  122     ldadr        1         9          ;101
+  123     ldcon.i      0         1          ;101
+  124     lobnd.i      0         0          ;101
+  125     sinit        0         0          ;101
+  126     ldadr        1         7          ;102
+  127     ldcon.i      0         1          ;102
+  128     lobnd.i      0         0          ;102
+  129     sinit        0         0          ;102
+  130     ldadr        1         5          ;102
+  131     ldcon.i      0         0          ;104
+  132     store.i      0         0          ;104
+  133     cobeg        0         0          ;104
+  134     mkstk        1        58          ;105
+  135     ldadr        1        10          ;105
+  136     procv        0         0          ;105
+  137     calls        1         4          ;105
+  138     mkstk        1        58          ;106
+  139     ldadr        1        11          ;106
+  140     procv        0         0          ;106
+  141     calls        1         4          ;106
+  142     mkstk        1        58          ;107
+  143     ldadr        1        12          ;107
+  144     procv        0         0          ;107
+  145     calls        1         4          ;107
+  146     coend        0         0          ;108
+  147     ldadr        1         6          ;110
+  148     rpadr        0         0          ;110
+  149     wrval        0         0          ;110
+  150     stopx        0         0          ;110

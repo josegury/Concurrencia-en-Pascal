@@ -1,0 +1,47 @@
+program Barbero;
+var sSillas,sCliente,sBarbero,sPantalla,sPuerta : semaphore;
+const sitios = 5;
+process type tCliente(id : integer);
+begin
+	repeat
+		wait(sSillas);{se sienta}
+		signal(sCliente);{el cliente se dispone a que le corten el pelo}
+		wait(sBarbero);
+			wait(sPantalla);
+				writeln('cortando el pelo al cliente ', id);
+			signal(sPantalla);
+		signal(sSillas);{se levanta}
+		wait(sPuerta);
+			wait(sPantalla);
+				writeln('el cliente ', id,' se va');
+			signal(sPantalla);
+		signal(sPuerta);{se levanta}
+	forever;
+end;
+process barbero;
+begin
+	repeat
+		wait(sPantalla);
+			writeln('El barbero esta durmiendo...');
+		signal(sPantalla);
+		wait(sCLiente);{llama a un cliente}
+		wait(sPantalla);
+		writeln('cortando el pelo...');
+		signal(sPantalla);
+		signal(sBarbero);{termina de cortar el pelo}
+	forever;
+end;
+
+var clientes:array [1..sitios] of tCliente;
+i:integer;
+begin
+	initial(sSillas,sitios);
+	initial(sbarbero,0);
+	initial(sCliente,0);
+	initial(sPantalla,1);
+	initial(sPuerta,2);
+	cobegin
+		barbero;
+		for i:=1 to sitios do clientes[i](i);
+	coend;
+end.

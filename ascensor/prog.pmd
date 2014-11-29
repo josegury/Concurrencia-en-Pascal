@@ -1,0 +1,90 @@
+Pascal-FC post-mortem report on prog
+- Interpreter Version P5.3 - 
+Abnormal halt in process ascensor with pc = 48
+Reason:   statement limit of 200000 reached (possible livelock)
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process ascensor
+
+Status:  active
+pc = 48
+
+
+----------
+Process personas[0]
+
+Status:  terminated
+
+
+----------
+Process personas[1]
+
+Status:  terminated
+
+
+----------
+Process personas[2]
+
+Status:  terminated
+
+
+----------
+Process personas[3]
+
+Status:  terminated
+
+
+----------
+Process personas[4]
+
+Status:  terminated
+
+
+----------
+Process personas[5]
+
+Status:  terminated
+
+
+----------
+Process personas[6]
+
+Status:  terminated
+
+
+----------
+Process personas[7]
+
+Status:  terminated
+
+
+----------
+Process personas[8]
+
+Status:  terminated
+
+
+----------
+Process personas[9]
+
+Status:  terminated
+
+
+----------
+Process personas[10]
+
+Status:  terminated
+
+
+
+==========
+Global variables
+
+i          = 10

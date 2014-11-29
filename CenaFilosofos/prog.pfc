@@ -1,0 +1,21 @@
+program prog;
+
+
+
+
+
+
+process type filosofo (name : integer); 
+begin 
+ repeat 
+ Pensar; 
+ Coger palillos; 
+ Comer; 
+ Soltar Palillos; 
+ forever 
+end;
+	
+{MAIN}
+begin
+
+end.

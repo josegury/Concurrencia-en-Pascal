@@ -1,0 +1,56 @@
+program prog;
+const botesTotal = 5;
+	  numPintores = 10;
+monitor sociedad;
+	export pintarCuadro,TerminaCuadro;
+		var bote:integer;
+			esperaBote : condition;
+			
+	procedure pintarCuadro(id:integer);
+	begin
+		if bote=0 then
+		begin
+		writeln('El pintor ', id, ' esta esperando pintura');
+			delay(esperaBote);
+		end;
+			
+		writeln('El pintor ', id, ' esta pintando');
+		bote := bote-1;
+	end;
+	
+	procedure TerminaCuadro(id:integer);
+	begin
+		writeln('El pintor ', id, ' ha terminado su obra');
+		bote:=bote+1;
+		resume(esperaBote);{despierto al siguiente pintor}
+	end;
+	
+{CUERPO MONITOR}
+begin
+	bote:=botesTotal;
+end;
+{FIN MONITOR}
+
+process type pintor(id:integer);
+var obras:integer;
+begin
+		obras:=random(5);
+		while obras > 0 do
+		begin
+		
+			sociedad.pintarCuadro(id);
+			sleep(random(5));
+			sociedad.TerminaCuadro(id);
+			
+			obras:=obras-1;
+		end;
+end;
+
+var pintores : array[0..numPintores] of pintor;
+	i : integer;
+begin
+	cobegin
+		for i:=0 to numPintores do
+			pintores[i](i);
+	coend;
+end.

@@ -1,0 +1,242 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program aseosMixtos;
+    2     0 monitor bater;
+    3     0  export mear,mearSentada,dejarmearHombre,dejarmearMujer;
+    4     0  var hombres,mujeres : condition;
+    5     0   nMujeres,nHombres : integer;
+    6     0   
+    7     0  procedure mear(id:integer);
+    8     0  begin
+    9     0   while nMujeres > 0 do
+   10     4    delay(hombres);
+   11     7   nHombres := nHombres + 1;
+   12    12   writeln('El hombre',id,'Esta meando y no esta apuntando');
+   13    19  end;
+   14    20  
+   15    20  procedure mearSentada(id:integer);
+   16    20  begin
+   17    20   while nHombres > 0 do
+   18    24    delay(mujeres);
+   19    27   nMujeres := nMujeres + 1;
+   20    32   writeln('La mujer',id,' se ha sentado en los meaos de los tios');
+   21    39  end;
+   22    40  
+   23    40  procedure dejarmearHombre(id:integer);
+   24    40  begin
+   25    40   nHombres := nHombres - 1;
+   26    45   writeln('El hombre',id,'se pira del bater');
+   27    52   while (not empty(mujeres)) and (nhombres = 0) do
+   28    60    resume(mujeres);
+   29    63  end;
+   30    64  
+   31    64  procedure dejarmearMujer(id:integer);
+   32    64  begin
+   33    64   nMujeres := nMujeres - 1;
+   34    69   writeln('La mujer',id,'se pira del bater');
+   35    76   while (not empty(hombres)) and (nMujeres = 0) do
+   36    84    resume(hombres);
+   37    87  end;
+   38    88  
+   39    88 begin
+   40    89 end;
+   41    89 
+   42    89 
+   43    89 process type hombre(id:integer);
+   44    89 begin
+   45    89  bater.mear(id);
+   46    95  bater.dejarmearHombre(id);
+   47   101 end;
+   48   102 
+   49   102 process type mujer(id:integer);
+   50   102 begin
+   51   102  bater.mearSentada(id);
+   52   108  bater.dejarmearMujer(id);
+   53   114 end;
+   54   115 
+   55   115 var i: integer;
+   56   115  hombres : array[0..5] of hombre;
+   57   115  mujeres : array[0..5] of mujer;
+   58   115 begin
+   59   115  cobegin
+   60   116   for i:=0 to 5 do
+   61   120   begin
+   62   120    hombres[i](i);
+   63   127    mujeres[i](i);
+   64   134   end;
+   65   135  coend;
+   66   136 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0  115    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 bater        46     variable    monvar          3      True    1    5   88
+ 48 hombres       0     variable    condition       0      True    1    7    0
+ 49 mujeres      48     variable    condition       0      True    1    8    0
+ 50 nmujeres     49     variable    integer         0      True    1    9    0
+ 51 nhombres     50     variable    integer         0      True    1   10    0
+ 52 mear         51     monproc     notyp           4      True    2    0    0
+ 53 id            0     variable    integer         0      True    3    5    0
+ 54 mearsentad   52     monproc     notyp           5      True    2   20    0
+ 55 id            0     variable    integer         0      True    3    5    0
+ 56 dejarmearh   54     monproc     notyp           6      True    2   40    0
+ 57 id            0     variable    integer         0      True    3    5    0
+ 58 dejarmearm   56     monproc     notyp           7      True    2   64    0
+ 59 id            0     variable    integer         0      True    3    5    0
+ 60 hombre       47     type id     process         8      True    1   89    0
+ 61 id            0     variable    integer         0      True    2    5    0
+ 62 mujer        60     type id     process         9      True    1  102    0
+ 63 id            0     variable    integer         0      True    2    5    0
+ 64 i            62     variable    integer         0      True    1   11    0
+ 65 hombres      64     variable    array           1      True    1   12    0
+ 66 mujeres      65     variable    array           2      True    1   18    0
+
+Generated P-code
+
+    0     ldval.i      1         9          ;9
+    1     ldcon.i      0         0          ;9
+    2     relgt.i      0         0          ;9
+    3     jmpiz        0         7          ;9
+    4     ldadr        1         7          ;10
+    5     delay        0         0          ;10
+    6     jmpuc        0         0          ;10
+    7     ldadr        1        10          ;10
+    8     ldval.i      1        10          ;11
+    9     ldcon.i      0         1          ;11
+   10     addop.i      0         0          ;11
+   11     store.i      0         0          ;11
+   12     ldcon.i      0         9          ;12
+   13     wrstr        0         0          ;12
+   14     ldval.i      3         5          ;12
+   15     wrval.i      0         0          ;12
+   16     ldcon.i      0        31          ;12
+   17     wrstr        0         9          ;12
+   18     wrlin        0         0          ;12
+   19     rproc        0         0          ;12
+   20     ldval.i      1        10          ;17
+   21     ldcon.i      0         0          ;17
+   22     relgt.i      0         0          ;17
+   23     jmpiz        0        27          ;17
+   24     ldadr        1         8          ;18
+   25     delay        0         0          ;18
+   26     jmpuc        0        20          ;18
+   27     ldadr        1         9          ;18
+   28     ldval.i      1         9          ;19
+   29     ldcon.i      0         1          ;19
+   30     addop.i      0         0          ;19
+   31     store.i      0         0          ;19
+   32     ldcon.i      0         8          ;20
+   33     wrstr        0        40          ;20
+   34     ldval.i      3         5          ;20
+   35     wrval.i      0         0          ;20
+   36     ldcon.i      0        39          ;20
+   37     wrstr        0        48          ;20
+   38     wrlin        0         0          ;20
+   39     rproc        0         0          ;20
+   40     ldadr        1        10          ;24
+   41     ldval.i      1        10          ;25
+   42     ldcon.i      0         1          ;25
+   43     subop.i      0         0          ;25
+   44     store.i      0         0          ;25
+   45     ldcon.i      0         9          ;26
+   46     wrstr        0        87          ;26
+   47     ldval.i      3         5          ;26
+   48     wrval.i      0         0          ;26
+   49     ldcon.i      0        17          ;26
+   50     wrstr        0        96          ;26
+   51     wrlin        0         0          ;26
+   52     ldadr        1         8          ;27
+   53     stfun.b      0        20          ;27
+   54     notop.b      0         0          ;27
+   55     ldval.i      1        10          ;27
+   56     ldcon.i      0         0          ;27
+   57     releq.i      0         0          ;27
+   58     andop.b      0         0          ;27
+   59     jmpiz        0        63          ;27
+   60     ldadr        1         8          ;28
+   61     resum        0         0          ;28
+   62     jmpuc        0        52          ;28
+   63     rproc        0         0          ;28
+   64     ldadr        1         9          ;32
+   65     ldval.i      1         9          ;33
+   66     ldcon.i      0         1          ;33
+   67     subop.i      0         0          ;33
+   68     store.i      0         0          ;33
+   69     ldcon.i      0         8          ;34
+   70     wrstr        0       113          ;34
+   71     ldval.i      3         5          ;34
+   72     wrval.i      0         0          ;34
+   73     ldcon.i      0        17          ;34
+   74     wrstr        0       121          ;34
+   75     wrlin        0         0          ;34
+   76     ldadr        1         7          ;35
+   77     stfun.b      0        20          ;35
+   78     notop.b      0         0          ;35
+   79     ldval.i      1         9          ;35
+   80     ldcon.i      0         0          ;35
+   81     releq.i      0         0          ;35
+   82     andop.b      0         0          ;35
+   83     jmpiz        0        87          ;35
+   84     ldadr        1         7          ;36
+   85     resum        0         0          ;36
+   86     jmpuc        0        76          ;36
+   87     rproc        0         0          ;36
+   88     prsel        0         0          ;37
+   89     ldadr        1         5          ;45
+   90     enmon        0         0          ;45
+   91     mkstk        0        52          ;45
+   92     ldval.i      2         5          ;45
+   93     calls        0         5          ;45
+   94     exmon        0         0          ;45
+   95     ldadr        1         5          ;46
+   96     enmon        0         0          ;46
+   97     mkstk        0        56          ;46
+   98     ldval.i      2         5          ;46
+   99     calls        0         5          ;46
+  100     exmon        0         0          ;46
+  101     rproc        1         0          ;46
+  102     ldadr        1         5          ;51
+  103     enmon        0         0          ;51
+  104     mkstk        0        54          ;51
+  105     ldval.i      2         5          ;51
+  106     calls        0         5          ;51
+  107     exmon        0         0          ;51
+  108     ldadr        1         5          ;52
+  109     enmon        0         0          ;52
+  110     mkstk        0        58          ;52
+  111     ldval.i      2         5          ;52
+  112     calls        0         5          ;52
+  113     exmon        0         0          ;52
+  114     rproc        1         0          ;52
+  115     cobeg        0         0          ;57
+  116     ldadr        1        11          ;59
+  117     ldcon.i      0         0          ;60
+  118     ldcon.i      0         5          ;60
+  119     for1u.i      0       135          ;60
+  120     mkstk        1        60          ;61
+  121     ldadr        1        12          ;61
+  122     ldval.i      1        11          ;62
+  123     ixary.i      0         1          ;62
+  124     procv        0         0          ;62
+  125     ldval.i      1        11          ;62
+  126     calls        1         5          ;62
+  127     mkstk        1        62          ;62
+  128     ldadr        1        18          ;62
+  129     ldval.i      1        11          ;63
+  130     ixary.i      0         2          ;63
+  131     procv        0         0          ;63
+  132     ldval.i      1        11          ;63
+  133     calls        1         5          ;63
+  134     for2u.i      0       120          ;63
+  135     coend        0         0          ;64
+  136     stopx        0         0          ;65

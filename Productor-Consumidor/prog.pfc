@@ -1,0 +1,75 @@
+program prog;
+
+var dato : integer;
+	producido : boolean;
+	mutex : semaphore;
+
+process productor;
+var i : integer;
+begin
+	
+	for i := 1 to 100 do
+	begin
+		while(producido) do null;
+			dato := i;
+			producido := true;
+	end;
+end;
+
+
+process consumidor;
+var i : integer;
+begin	
+	for i:= 1 to 100 do
+	begin
+		while (not producido) do null;
+			writeln(dato);
+			producido := false;				
+	end;
+end;
+
+
+process consdos;
+var i : integer;
+begin	
+	for i:= 1 to 100 do
+	begin
+		while (not producido) do null;
+			wait(mutex);
+			if (producido) then
+			begin
+				writeln('Consumidor2: ',dato);
+				producido := false;		
+			end;	
+			signal(mutex);			
+	end;
+end;
+
+process constres;
+var i : integer;
+begin	
+	for i:= 1 to 100 do
+	begin
+		while (not producido) do null;
+			wait(mutex);
+			if (producido) then
+			begin
+				writeln('Consumidor3: ',dato);
+				producido := false;		
+			end;	
+			signal(mutex);	
+	end;
+end;
+
+
+(*Main*)
+
+begin
+	producido := false;
+	initial(mutex,1);
+	cobegin
+		productor;
+		consdos;
+		constres;
+	coend;
+end.

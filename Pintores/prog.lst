@@ -1,0 +1,181 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 const botesTotal = 5;
+    3     0    numPintores = 10;
+    4     0 monitor sociedad;
+    5     0  export pintarCuadro,TerminaCuadro;
+    6     0   var bote:integer;
+    7     0    esperaBote : condition;
+    8     0    
+    9     0  procedure pintarCuadro(id:integer);
+   10     0  begin
+   11     0   if bote=0 then
+   12     4   begin
+   13     4   writeln('El pintor ', id, ' esta esperando pintura');
+   14    11    delay(esperaBote);
+   15    13   end;
+   16    13    
+   17    13   writeln('El pintor ', id, ' esta pintando');
+   18    20   bote := bote-1;
+   19    25  end;
+   20    26  
+   21    26  procedure TerminaCuadro(id:integer);
+   22    26  begin
+   23    26   writeln('El pintor ', id, ' ha terminado su obra');
+   24    33   bote:=bote+1;
+   25    38   resume(esperaBote);{despierto al siguiente pintor}
+   26    40  end;
+   27    41  
+   28    41 {CUERPO MONITOR}
+   29    41 begin
+   30    42  bote:=botesTotal;
+   31    45 end;
+   32    46 {FIN MONITOR}
+   33    46 
+   34    46 process type pintor(id:integer);
+   35    46 var obras:integer;
+   36    46 begin
+   37    46   obras:=random(5);
+   38    50   while obras > 0 do
+   39    54   begin
+   40    54   
+   41    54    sociedad.pintarCuadro(id);
+   42    60    sleep(random(5));
+   43    63    sociedad.TerminaCuadro(id);
+   44    69    
+   45    69    obras:=obras-1;
+   46    74   end;
+   47    75 end;
+   48    76 
+   49    76 var pintores : array[0..numPintores] of pintor;
+   50    76  i : integer;
+   51    76 begin
+   52    77  cobegin
+   53    78   for i:=0 to numPintores do
+   54    82    pintores[i](i);
+   55    90  coend;
+   56    91 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   76    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 botestotal   46     constant    integer         0     False    1    5    0
+ 48 numpintore   47     constant    integer         0     False    1   10    0
+ 49 sociedad     48     variable    monvar          3      True    1    5   41
+ 50 bote          0     variable    integer         0      True    1    7    0
+ 51 esperabote   50     variable    condition       0      True    1    8    0
+ 52 pintarcuad   51     monproc     notyp           4      True    2    0    0
+ 53 id            0     variable    integer         0      True    3    5    0
+ 54 terminacua   52     monproc     notyp           5      True    2   26    0
+ 55 id            0     variable    integer         0      True    3    5    0
+ 56 pintor       49     type id     process         6      True    1   46    0
+ 57 id            0     variable    integer         0      True    2    5    0
+ 58 obras        57     variable    integer         0      True    2    6    0
+ 59 pintores     56     variable    array           1      True    1    9    0
+ 60 i            59     variable    integer         0      True    1   20    0
+
+Generated P-code
+
+    0     ldval.i      1         7          ;11
+    1     ldcon.i      0         0          ;11
+    2     releq.i      0         0          ;11
+    3     jmpiz        0        13          ;11
+    4     ldcon.i      0        10          ;13
+    5     wrstr        0         0          ;13
+    6     ldval.i      3         5          ;13
+    7     wrval.i      0         0          ;13
+    8     ldcon.i      0        23          ;13
+    9     wrstr        0        10          ;13
+   10     wrlin        0         0          ;13
+   11     ldadr        1         8          ;14
+   12     delay        0         0          ;14
+   13     ldcon.i      0        10          ;17
+   14     wrstr        0        33          ;17
+   15     ldval.i      3         5          ;17
+   16     wrval.i      0         0          ;17
+   17     ldcon.i      0        14          ;17
+   18     wrstr        0        43          ;17
+   19     wrlin        0         0          ;17
+   20     ldadr        1         7          ;17
+   21     ldval.i      1         7          ;18
+   22     ldcon.i      0         1          ;18
+   23     subop.i      0         0          ;18
+   24     store.i      0         0          ;18
+   25     rproc        0         0          ;18
+   26     ldcon.i      0        10          ;23
+   27     wrstr        0        57          ;23
+   28     ldval.i      3         5          ;23
+   29     wrval.i      0         0          ;23
+   30     ldcon.i      0        21          ;23
+   31     wrstr        0        67          ;23
+   32     wrlin        0         0          ;23
+   33     ldadr        1         7          ;23
+   34     ldval.i      1         7          ;24
+   35     ldcon.i      0         1          ;24
+   36     addop.i      0         0          ;24
+   37     store.i      0         0          ;24
+   38     ldadr        1         8          ;25
+   39     resum        0         0          ;25
+   40     rproc        0         0          ;25
+   41     prsel        0         0          ;26
+   42     ldadr        1         7          ;29
+   43     ldcon.i      0         5          ;30
+   44     store.i      0         0          ;30
+   45     mretn        0         0          ;30
+   46     ldadr        2         6          ;36
+   47     ldcon.i      0         5          ;37
+   48     stfun.i      0        19          ;37
+   49     store.i      0         0          ;37
+   50     ldval.i      2         6          ;38
+   51     ldcon.i      0         0          ;38
+   52     relgt.i      0         0          ;38
+   53     jmpiz        0        75          ;38
+   54     ldadr        1         5          ;41
+   55     enmon        0         0          ;41
+   56     mkstk        0        52          ;41
+   57     ldval.i      2         5          ;41
+   58     calls        0         5          ;41
+   59     exmon        0         0          ;41
+   60     ldcon.i      0         5          ;42
+   61     stfun.i      0        19          ;42
+   62     sleep        0         0          ;42
+   63     ldadr        1         5          ;43
+   64     enmon        0         0          ;43
+   65     mkstk        0        54          ;43
+   66     ldval.i      2         5          ;43
+   67     calls        0         5          ;43
+   68     exmon        0         0          ;43
+   69     ldadr        2         6          ;43
+   70     ldval.i      2         6          ;45
+   71     ldcon.i      0         1          ;45
+   72     subop.i      0         0          ;45
+   73     store.i      0         0          ;45
+   74     jmpuc        0        50          ;45
+   75     rproc        1         0          ;46
+   76     mexec        0        42          ;50
+   77     cobeg        0         0          ;50
+   78     ldadr        1        20          ;52
+   79     ldcon.i      0         0          ;53
+   80     ldcon.i      0        10          ;53
+   81     for1u.i      0        90          ;53
+   82     mkstk        1        56          ;53
+   83     ldadr        1         9          ;53
+   84     ldval.i      1        20          ;54
+   85     ixary.i      0         1          ;54
+   86     procv        0         0          ;54
+   87     ldval.i      1        20          ;54
+   88     calls        1         5          ;54
+   89     for2u.i      0        82          ;54
+   90     coend        0         0          ;54
+   91     stopx        0         0          ;55

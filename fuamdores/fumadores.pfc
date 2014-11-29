@@ -1,0 +1,81 @@
+{El Problema de los Fumadres de tabaco de liar}
+
+
+{Miguel Ángel Galdón}
+
+
+program liadores;  
+
+const 
+
+ maxliadores=3;
+type
+ Tsynchan=channel of synchronous;
+ ingredientes=channel of integer;
+
+var 
+ cojoI,liado:array[1..maxliadores] of Tsynchan;
+ canalAgente:array[1..2]of ingredientes;
+
+process type liador(id:integer);
+begin
+ repeat
+  cojoI[id] ?any;
+  writeln('Fumador ',id,': liando');
+  sleep(5); {liando}
+  writeln('Fumador ',id,': ha terminado');
+  liado[id] !any;
+ forever
+end;
+
+process agente;
+ var
+  ing1,ing2:integer;
+ begin
+ repeat
+  ing1:=random(2)+1;
+  repeat
+   ing2:=random(2)+1;
+  until ing1<>ing2 ;
+ canalAgente[1]!ing1;
+ canalAgente[2]!ing2;
+forever
+end;
+
+process tabla;
+ var
+  i:integer;
+  i1,i2:integer;
+  mesaVacia:boolean;
+ begin
+  mesaVacia:=true;
+  repeat
+   select 
+    for i:=1 to maxliadores replicate
+     when (i<>i1)and(i<>i2)and not mesaVacia =>
+       cojoI[i]!any;
+       liado[i]? any;
+       mesaVacia:=true;
+    or
+     when mesaVacia=>
+      canalAgente[1]?i1;
+      canalAgente[2]?i2;
+      writeln('Agente pone ',i1,' y ',i2,' en mesa');
+      mesaVacia:=false;
+   end; {select}
+  forever
+end;
+
+{P. PPal}
+
+var
+ j:integer;
+ liadores:array[1..maxliadores]of liador;
+ begin
+  cobegin
+   agente;
+   tabla;
+   for j:=1 to maxliadores do
+     liadores[j](j);
+  coend;
+end.

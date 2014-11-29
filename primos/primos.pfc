@@ -1,0 +1,66 @@
+program primos;
+
+ const N=10;
+
+ type Tcanal = channel of integer;
+      Tcanales = array [0..N] of Tcanal;
+ var pipeline : Tcanales;
+     output: Tcanales; {1 mas de los necesarios}
+     
+ process numbers (var out : Tcanal); {envia por pipeline[0]}
+  {produce una serie de enteros}
+  var i : integer;
+  begin
+   i:=2;
+   repeat
+    out ! i;
+    i := i+1;
+   forever;
+  end;
+  
+ process consumer (var into :Tcanal);
+  {consume todos los enteros que pasan la criba}
+  var i: integer;
+  begin
+   repeat
+    into ? i;
+   forever;
+  end;
+  
+ process type TElementos ( var left,right,down : Tcanal);
+   {implementa los filtros}
+  var primero,siguiente : integer;
+  begin
+   left ? primero; {cogemos izquierda}
+   down ! primero; {mandamos abajo}
+   repeat
+    left ? siguiente;
+    if (siguiente mod primero <> 0) then
+     right ! siguiente;
+   forever;
+  end;
+  
+  process outproc (var outs : Tcanales);
+   {genera la salida del programa}
+   var i, num : integer;
+   begin
+    for i := 1 to N do
+     begin
+      outs[i] ? num;
+      writeln(num);
+     end;
+    end;
+  
+ var filtros: array[1..N] of TElementos;
+     i : integer;
+  
+begin
+ cobegin
+  numbers(pipeline[0]);
+  consumer(pipeline[N]);
+  for i := 1 to N do
+   filtros[i] (pipeline[i-1],pipeline[i],output[i]);
+  outproc(output);
+ coend;
+
+end.

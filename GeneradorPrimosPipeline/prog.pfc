@@ -1,0 +1,37 @@
+program prog;
+const N = 5;
+type tcEntero = channel of integer;
+	 tcPipe = array [1..N+1] of tcEntero;
+	 tcOutPut = array[1..N] of tcEntero;
+
+process numbers(var out:tcEntero);
+	var i:integer;
+begin
+	i:=2;
+	repeat
+		out ! i;
+		i:=i+1;
+	forever;
+end;
+
+process salida(var outs:tcOutPut);
+var i, num : integer;
+begin
+	for i:=1 to N do
+	begin
+		outs[i] ? num;
+		writeln(num);
+	end;
+end;
+
+process consum(var into:tcEntero);
+	var i:integer;
+begin
+	repeat
+		into ? i;
+	forever;
+end;
+{MAIN}
+begin
+
+end.

@@ -1,0 +1,191 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 
+    3     0 type intchan = channel of integer;
+    4     0 
+    5     0 process buffer( var put,get : intchan);
+    6     0  const CAPBUFF = 32;
+    7     0 var buff : array [0..31] of integer;
+    8     0  top,base : integer;
+    9     0 
+   10     0 begin  
+   11     0  top:= 0;
+   12     3  base := 0;
+   13     6  repeat
+   14     6   select 
+   15     6    put ? buff[top];
+   16    16    top := (top+1) mod CAPBUFF;
+   17    23   or
+   18    24    get ! buff[base];
+   19    34    base := (base + 1) mod CAPBUFF;
+   20    41   end{-select}
+   21    43  forever
+   22    44 end;
+   23    45 
+   24    45 process productor(var put : intchan);
+   25    45  var i : integer;
+   26    45 begin
+   27    45  for i:= 1 to 100 do
+   28    49  begin
+   29    49   if (i mod 2) = 0 then
+   30    55   begin
+   31    55    put ! i;
+   32    58    writeln('Dado producido ', i);
+   33    63   end; 
+   34    63  end;
+   35    64 end;
+   36    65 
+   37    65 process consumidor(var get : intchan);
+   38    65  var temp : integer;
+   39    65 begin
+   40    65  while (temp <> 100) do
+   41    69  begin
+   42    69    get ? temp;
+   43    72    writeln(' Dado consumido ', temp);
+   44    77  end;
+   45    78 end;
+   46    79 
+   47    79 {MAIN}
+   48    79 var put,get : intchan;
+   49    79 begin
+   50    79  cobegin
+   51    80   buffer(put,get);
+   52    86   productor(put);
+   53    91   consumidor(get);
+   54    96  coend;
+   55    97 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   79    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 intchan      46     type id     channel         1     False    1    3    0
+ 48 buffer       47     variable    process         3      True    1    5    0
+ 49 $            48     type id     process         3      True    1    0    0
+ 50 put           0     variable    channel         1     False    2    5    0
+ 51 get          50     variable    channel         1     False    2    6    0
+ 52 capbuff      51     constant    integer         0     False    2   32    0
+ 53 buff         52     variable    array           1      True    2    7    0
+ 54 top          53     variable    integer         0      True    2   39    0
+ 55 base         54     variable    integer         0      True    2   40    0
+ 56 productor    49     variable    process         4      True    1    6    0
+ 57 $            56     type id     process         4      True    1   45    0
+ 58 put           0     variable    channel         1     False    2    5    0
+ 59 i            58     variable    integer         0      True    2    6    0
+ 60 consumidor   57     variable    process         5      True    1    7    0
+ 61 $            60     type id     process         5      True    1   65    0
+ 62 get           0     variable    channel         1     False    2    5    0
+ 63 temp         62     variable    integer         0      True    2    6    0
+ 64 put          61     variable    channel         1      True    1    8    0
+ 65 get          64     variable    channel         1      True    1   11    0
+
+Generated P-code
+
+    0     ldadr        2        39          ;10
+    1     ldcon.i      0         0          ;11
+    2     store.i      0         0          ;11
+    3     ldadr        2        40          ;11
+    4     ldcon.i      0         0          ;12
+    5     store.i      0         0          ;12
+    6     sel1         0         0          ;13
+    7     ldval.adr    2         5          ;14
+    8     ldadr        2         7          ;15
+    9     ldval.i      2        39          ;15
+   10     ixary.i      0         1          ;15
+   11     sel1         3         2          ;15
+   12     sel1         4         1          ;15
+   13     sel1         5        16          ;15
+   14     ldcon.i      0         0          ;15
+   15     jmpuc        0        24          ;15
+   16     ldadr        2        39          ;15
+   17     ldval.i      2        39          ;16
+   18     ldcon.i      0         1          ;16
+   19     addop.i      0         0          ;16
+   20     ldcon.i      0        32          ;16
+   21     modop.i      0         0          ;16
+   22     store.i      0         0          ;16
+   23     jmpuc        0        43          ;16
+   24     ldval.adr    2         6          ;17
+   25     ldadr        2         7          ;18
+   26     ldval.i      2        40          ;18
+   27     ixary.i      0         1          ;18
+   28     rpadr.i      0         0          ;18
+   29     sel1         3         0          ;18
+   30     sel1         4         1          ;18
+   31     sel1         5        34          ;18
+   32     ldcon.i      0         0          ;18
+   33     jmpuc        0        42          ;18
+   34     ldadr        2        40          ;18
+   35     ldval.i      2        40          ;19
+   36     ldcon.i      0         1          ;19
+   37     addop.i      0         0          ;19
+   38     ldcon.i      0        32          ;19
+   39     modop.i      0         0          ;19
+   40     store.i      0         0          ;19
+   41     jmpuc        0        43          ;19
+   42     sel0         0         0          ;19
+   43     jmpuc        0         6          ;19
+   44     rproc        1         0          ;21
+   45     ldadr        2         6          ;26
+   46     ldcon.i      0         1          ;27
+   47     ldcon.i      0       100          ;27
+   48     for1u.i      0        64          ;27
+   49     ldval.i      2         6          ;29
+   50     ldcon.i      0         2          ;29
+   51     modop.i      0         0          ;29
+   52     ldcon.i      0         0          ;29
+   53     releq.i      0         0          ;29
+   54     jmpiz        0        63          ;29
+   55     ldval.adr    2         5          ;30
+   56     ldval.i      2         6          ;31
+   57     chnwr.i      0         1          ;31
+   58     ldcon.i      0        15          ;32
+   59     wrstr        0         0          ;32
+   60     ldval.i      2         6          ;32
+   61     wrval.i      0         0          ;32
+   62     wrlin        0         0          ;32
+   63     for2u.i      0        49          ;33
+   64     rproc        1         0          ;34
+   65     ldval.i      2         6          ;40
+   66     ldcon.i      0       100          ;40
+   67     relne.i      0         0          ;40
+   68     jmpiz        0        78          ;40
+   69     ldval.adr    2         5          ;41
+   70     ldadr        2         6          ;42
+   71     chnrd        0         1          ;42
+   72     ldcon.i      0        16          ;43
+   73     wrstr        0        15          ;43
+   74     ldval.i      2         6          ;43
+   75     wrval.i      0         0          ;43
+   76     wrlin        0         0          ;43
+   77     jmpuc        0        65          ;43
+   78     rproc        1         0          ;44
+   79     cobeg        0         0          ;48
+   80     mkstk        1        49          ;50
+   81     ldadr        1         5          ;50
+   82     procv        0         0          ;50
+   83     ldadr        1         8          ;51
+   84     ldadr        1        11          ;51
+   85     calls        1         6          ;51
+   86     mkstk        1        57          ;51
+   87     ldadr        1         6          ;51
+   88     procv        0         0          ;51
+   89     ldadr        1         8          ;52
+   90     calls        1         5          ;52
+   91     mkstk        1        61          ;52
+   92     ldadr        1         7          ;52
+   93     procv        0         0          ;52
+   94     ldadr        1        11          ;53
+   95     calls        1         5          ;53
+   96     coend        0         0          ;53
+   97     stopx        0         0          ;54

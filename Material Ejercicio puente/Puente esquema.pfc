@@ -1,0 +1,70 @@
+program puente1;
+
+
+
+var
+    pantalla:semaphore;
+
+
+
+procedure entraRojo(id : integer);
+ begin
+  wait(pantalla);writeLN('Coche Rojo ',id,' entra');signal(pantalla);
+ end;
+ 
+ Procedure saleRojo(id : integer);
+ begin
+  wait(pantalla);writeLN('Coche Rojo ',id,' sale');signal(pantalla);
+ end;
+ 
+ {Simétrico para los coches Azules}
+
+procedure entraAzul(id : integer);
+ begin
+ 
+  wait(pantalla);writeLN('                    ',
+           'Coche Azul ',id,' entra');signal(pantalla);
+ end;
+ 
+
+ 
+Procedure saleAzul(id : integer);
+ begin
+  wait(pantalla);writeLN('                    ',
+           'Coche Azul ',id,' sale');signal(pantalla);
+ end;
+  
+    
+process type TcocheAzule (id:integer);
+begin
+    sleep(Random(id));
+    entraAzul(id);
+    sleep(1);
+    saleAzul(id);
+end;
+   
+process type TcocheRojo (id:integer);
+begin
+    sleep(Random(id));
+    entraRojo(id);
+    sleep(1);
+    saleRojo(id);
+end;
+    
+
+var
+    cocheRojo:array[1..10]of TcocheRojo;
+    cocheAzul:array[1..10]of TcocheAzul;
+    i: integer;
+    
+begin
+    
+    cobegin
+        for i:=1 to 10 do
+            begin           
+             cocheRojo[i](i);       
+             cocheAzul[i](i);
+            end;
+    coend;
+
+end.

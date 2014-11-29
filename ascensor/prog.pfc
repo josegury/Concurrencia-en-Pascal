@@ -1,0 +1,89 @@
+program prog;
+
+const maxPerson = 4;
+	  nPlantas = 4;
+	  
+monitor control; 
+	export entra,sale,abrirPuerta,avanzarPiso;
+	
+	var esperaPiso : array[0..nPlantas] of condition;
+		dentroAscensor : array[0..nPlantas] of condition;
+		pisoActual,ocupado : integer;
+		sube : boolean;
+		
+	{--------procedimientos Ascensor---------}
+	procedure avanzarPiso;
+	begin
+		if (pisoActual = nPlantas) or (pisoActual = 0) then { cambio la direccion del ascensor}
+			sube := not sube;
+				
+		if sube then pisoActual := pisoActual + 1
+		else	pisoActual := pisoActual - 1;	
+			
+		
+		
+	end;
+	
+	procedure abrirPuerta;
+	var i : integer;
+	begin
+		writeln('Ascensor en piso ', pisoActual); 
+		{while  not empty(dentroAscensor[pisoActual]) do
+			resume(dentroAscensor[pisoActual]);
+			
+		while  not empty(esperaPiso[pisoActual]) do
+			resume(esperaPiso[pisoActual]);}{con esta mierda peta}
+		for i:= 0 to 4 do
+			resume(esperaPiso[pisoActual]);
+		for i:= 0 to 10 do
+			resume(dentroAscensor[pisoActual]);
+	end;
+	
+	{--------procedimientos Personas---------}
+	procedure entra(id,origen:integer);
+	begin
+		while (origen <> pisoActual) or (ocupado = maxPerson) do
+			delay(esperaPiso[origen]);	{espero a que sea mi turno, o pueda entrar en el ascensor}
+		writeln('La persona ', id,' entra en el ascensor en el piso ',pisoActual);
+		ocupado := ocupado + 1;	
+	end;
+		
+	procedure sale(id,destino : integer);
+	begin
+		while pisoActual <> destino do
+			delay(dentroAscensor[destino]);{cuando llegue a mi destino me despierto}
+		writeln('La persona ',id,' sale del ascensor en el piso ', pisoActual);
+		ocupado := ocupado - 1;
+	end;
+	
+{CUERPO ASCENSOR}
+begin
+	sube := false;
+	pisoActual:=0;
+	ocupado:=0;
+end;
+{FIN ASCENSOR}
+
+process type persona(id,origen:integer);
+var pisoDestino : integer;
+begin
+	pisoDestino := random(nPlantas-1); {piso al que se dirije}
+	control.entra(id,origen);
+	control.sale(id,pisoDestino);
+end;
+process ascensor;
+begin
+	repeat
+		control.abrirPuerta;
+		control.avanzarPiso; 
+	forever;
+end;
+var personas : array[0..10] of persona;
+	i :integer;
+begin
+	cobegin
+		ascensor;
+		for i:= 0 to 10 do
+			personas[i](i,i mod nPlantas);
+	coend; 
+end.

@@ -1,0 +1,74 @@
+program prog;
+
+monitor jardin;
+		export entra, sale,ocupacion;{se ayaden al monitor las funciones que utilizara}
+		
+		{variables del monitor}
+		
+		const capacidad=4;{capacidad total del jardin}
+		var ocupado : integer;
+			lleno : condition;	
+	
+{----- Las funciones, aunque son de las personas pero se debe programar en el monitor, pues son las acciones -----}
+	
+	procedure entra(id:integer);
+	begin
+		if(ocupado = capacidad) then
+		begin
+			delay(lleno);{si el jardin esta lleno, el proceso que ejecuta el delay es bloqueado, hasta encontrar un resume}
+		end;
+		writeLN('Persona ',id,' entra al jardin');
+		ocupado:=ocupado+1;
+	end;
+	
+	
+	procedure sale(id:integer);{la persona sale del jardin (monitor)}
+	begin
+		writeLN('Persona ',id,' sale del jardin');
+		ocupado:=ocupado-1;
+		resume(lleno);{libera al primer proceso dormido segun la cola}
+	end;
+	
+	procedure ocupacion;{ver personas del monitor}
+	begin
+		writeLN('Ocupacion: ',ocupado, ' personas');
+	end;
+	
+{---------- Cuerpo del monitor ----------}
+begin 
+	ocupado:=0;
+end;
+	
+{--------------- Fin Monitor ------------}
+
+{----------- Funciones fuera del monitor -----------}
+
+process type Tpersona(id:integer);
+begin
+	sleep(Random(3));{para que las personas no entren todasd a la vez}
+	jardin.entra(id);
+	sleep(Random(5)+1);{visita}
+	jardin.sale(id);
+end;
+
+process MuestraOcupacion;{para mostrar la ocupacion que hay dentro del jardin}
+begin
+	repeat
+		sleep(2);
+		jardin.ocupacion;
+	forever;
+end;
+
+{ MAIN }
+
+var persona : array [1..15] of Tpersona;
+	i:integer;
+begin
+	cobegin
+		for i:=1 to 15 do
+		begin
+			persona[i](i);
+		end;
+		MuestraOcupacion;
+	coend;
+end.

@@ -1,0 +1,111 @@
+program prog;
+
+{escribir tres A y B, sabiendo que cada proceso puede escribir una A y una B}
+
+const ntp = 3;
+var cont : integer;
+	barrera, mutex : semaphore;
+	{para el reentrante: }
+	torno1: semaphore; 
+	torno2: semaphore; 
+	
+	
+process type Tprocesos;{mala solucion}
+var i,j : integer;
+begin
+	for j := 1 to 40 do
+	begin
+	
+		write('A');
+	
+		wait(mutex); { protejemos el contador con el semaforo }
+			cont:=cont+1;	
+			if ntp = cont then { si llega al ultimo proceso }
+			begin
+				for i := 1 to ntp do
+				begin
+					signal(barrera);
+				
+					wait(barrera); { si esta a cero, para y si esta a mas de cero, lo decrementa }
+				end;{fin 2º for}
+				cont:= 0;
+			end;{fin if}
+		signal(mutex); { solo un proceso accede a al contenido de esa seccion a la vez}
+		write('B');
+	end;{fin 1º bucle for}
+end;
+
+process type tProceso; {buena solucion-- con tornos}
+ var  i:integer; 
+ 
+ begin 
+ 	write('A'); 
+ 
+ 	wait(mutex); 
+ 		cont := cont + 1; 
+ 		if cont = ntp then 
+ 		for i:=1 to ntp do 
+ 			signal(barrera); 
+ 	signal(mutex); 
+ 
+ 	wait(barrera); 
+ 
+ write('B'); 
+ end; 
+
+{reentrane con tornos}
+
+process type TprocesTorno; 
+ begin 
+ repeat 
+ 	write('A'); 
+ 	wait(mutex); 
+ 	cont := cont+1; 
+ 	if (cont=ntp) then 
+ 	begin 
+ 		wait(torno2); {bloquea el segundo torno} 
+ 		signal(torno1); {desbloquea el primero} 
+ 	end; 
+ 	signal(mutex); 
+ 
+ 	wait(torno1); {primer torno} 
+ 	signal(torno1); 
+ 
+ 	write('B'); {Punto crítico} 
+ 
+ 	wait(mutex); 
+ 	cont := cont-1; 
+ 	if (cont=0) then 
+ 	begin 
+ 		wait(torno1); {bloquea el primero} 
+ 		signal(torno2); {desbloquea el segundo} 
+ 	end; 
+ 	signal(mutex); 
+ 
+ 	wait(torno2); {segundo torno} 
+ 	signal(torno2); 
+ forever; 
+end;
+
+(*MAIN*)
+
+var P1, P2,P3 : TprocesTorno;
+
+begin
+	{tProceso}
+	initial(barrera,0);(*inicio la barrera *)
+	initial(mutex,1);
+	
+	{tProcesos---tornos reutilizables}
+	initial(torno1,0); 
+	initial(torno2,1); 
+	initial(mutex,1); 
+	
+	cont:=0;
+	cobegin
+		P1;
+		P2;
+		P3;
+	coend;
+	write(barrera);
+end.

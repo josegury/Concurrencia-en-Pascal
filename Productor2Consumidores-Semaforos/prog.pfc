@@ -1,0 +1,57 @@
+program prog;{Espera Pasiva}
+var buff : array [0..31] of integer; {buffer donde se almacenaran los elementos producidos}
+	mutex,lleno,vacio : semaphore;
+	
+const tambuffer = 32;
+	  numElemen = 100;
+
+{PROCESO PRODUCTOR}
+
+process productor;
+	var  i,indPro :integer;		
+begin
+	indPro := 0;
+	for i:=0 to numElemen do
+	begin
+		wait(vacio);{restas un elemento a los elementos de vacio--como un contador de los vacios}
+		wait(mutex);
+			buff[indPro]:=i;	
+			writeln('			He Producido ', i);
+		signal(mutex);	
+		signal(lleno);
+		indPro := (indPro + 1) MOD tambuffer;  
+	end;
+	
+end;
+
+{PROCESO CONSUMIDOR}
+process type consumidor (id : integer);
+	var consumido, indCon :integer;		
+		
+begin
+	indCon := 0;
+	repeat
+		wait(lleno);
+		wait(mutex);
+				consumido := buff[indCon];
+				indCon := (indCon + 1) MOD tambuffer;  
+				writeln(id, ' He consumido ', consumido);
+		signal(mutex);{dejo de protejer la seccion}
+		signal(vacio);		
+	forever;
+end;
+
+
+
+{MAIN}
+var c1,c2 : consumidor;
+begin
+	initial(mutex,1);
+	initial(vacio,numElemen);
+	initial(lleno,0);
+	cobegin
+		c1(1);
+		productor;
+		c2(2);
+	coend;
+end.

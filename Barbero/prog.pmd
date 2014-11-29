@@ -1,0 +1,82 @@
+Pascal-FC post-mortem report on barbero
+- Interpreter Version P5.3 - 
+Abnormal halt in process clientes[1] with pc = 31
+Reason:   statement limit of 200000 reached (possible livelock)
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process barbero
+
+Status:  active
+pc = 80
+
+Process suspended on:
+
+ssalir (semaphore)
+
+
+----------
+Process clientes[1]
+
+Status:  active
+pc = 31
+
+
+----------
+Process clientes[2]
+
+Status:  active
+pc = 5
+
+
+----------
+Process clientes[3]
+
+Status:  active
+pc = 25
+
+Process suspended on:
+
+sbarbero (semaphore)
+
+
+----------
+Process clientes[4]
+
+Status:  active
+pc = 25
+
+Process suspended on:
+
+sbarbero (semaphore)
+
+
+----------
+Process clientes[5]
+
+Status:  active
+pc = 25
+
+Process suspended on:
+
+sbarbero (semaphore)
+
+
+
+==========
+Global variables
+
+i          = 5
+siguiente  = 4
+ssalir     = 0
+spuerta    = 1
+ssilla     = 2
+sbarbero   = 0
+scliente   = 3
+pantalla   = 0

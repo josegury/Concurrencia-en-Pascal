@@ -1,0 +1,266 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 var silla: semaphore;
+    3     0 sbarbero: semaphore;
+    4     0 scliente: semaphore;
+    5     0 Puerta: semaphore;
+    6     0 NClientesale: semaphore;
+    7     0 clientes: semaphore;
+    8     0 modi: semaphore;
+    9     0 NClientes: integer;
+   10     0 
+   11     0 process Barbero;
+   12     0 begin
+   13     0  repeat
+   14     0   signal(sbarbero);
+   15     2   if (NClientes = 0) then
+   16     6   begin
+   17     6    wait(clientes);
+   18     8     writeln('Estoy Durmiendo');
+   19    11    signal(clientes);  
+   20    13   end;
+   21    13   wait(scliente);
+   22    15   wait(clientes);
+   23    17    writeln('Estoy Afeitando');
+   24    20   signal(clientes);
+   25    22   sleep(5);
+   26    24   signal(Puerta);
+   27    26   wait(NClientesale);
+   28    28  forever
+   29    29 end;
+   30    30 
+   31    30 process type cliente(id : integer);
+   32    30 begin
+   33    30  
+   34    30  wait(modi);
+   35    32   NClientes:= NClientes +1;
+   36    37  signal(modi);
+   37    39 
+   38    39  wait(silla);
+   39    41    wait(clientes);
+   40    43     writeln('Entra cliente ',id);
+   41    48    signal(clientes);
+   42    50    
+   43    50   signal(scliente);
+   44    52    wait(clientes);
+   45    54     writeln('Se sienta el cliente ',id);
+   46    59    signal(clientes);
+   47    61   wait(sbarbero);
+   48    63  signal(silla);
+   49    65  
+   50    65  wait(clientes);
+   51    67   writeln('Está afeitando al cliente ',id);
+   52    72  signal(clientes);
+   53    74  
+   54    74  wait(Puerta);
+   55    76  
+   56    76  signal(NClientesale);
+   57    78  
+   58    78  wait(clientes);
+   59    80   writeln('Sale cliente ',id);
+   60    85  signal(clientes);
+   61    87  
+   62    87  wait(modi);
+   63    89   NClientes:= NClientes - 1;
+   64    94  signal(modi);
+   65    96 end;
+   66    97 
+   67    97 var cls: array[0..9] of cliente;
+   68    97 i: integer;
+   69    97 
+   70    97 begin
+   71    97  {Inicializacion de variables}
+   72    97  NClientes:=0;
+   73   100  initial(modi,1);
+   74   104  initial(silla,5);
+   75   108  initial(clientes,1);
+   76   112  initial(scliente,0);
+   77   116  initial(sbarbero,0);
+   78   120  initial(Puerta,0);
+   79   124  initial(NClientesale,0);
+   80   128  {ejecucion concurrente del programa}
+   81   128  cobegin
+   82   129   Barbero;
+   83   133   for i:= 0 to 9 do
+   84   137    cls[i](i);
+   85   145  coend;
+   86   146 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   97    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 silla        46     variable    semaphore       0      True    1    5    0
+ 48 sbarbero     47     variable    semaphore       0      True    1    6    0
+ 49 scliente     48     variable    semaphore       0      True    1    7    0
+ 50 puerta       49     variable    semaphore       0      True    1    8    0
+ 51 nclientesa   50     variable    semaphore       0      True    1    9    0
+ 52 clientes     51     variable    semaphore       0      True    1   10    0
+ 53 modi         52     variable    semaphore       0      True    1   11    0
+ 54 nclientes    53     variable    integer         0      True    1   12    0
+ 55 barbero      54     variable    process         3      True    1   13    0
+ 56 $            55     type id     process         3      True    1    0    0
+ 57 cliente      56     type id     process         4      True    1   30    0
+ 58 id            0     variable    integer         0      True    2    5    0
+ 59 cls          57     variable    array           1      True    1   14    0
+ 60 i            59     variable    integer         0      True    1   24    0
+
+Generated P-code
+
+    0     ldadr        1         6          ;14
+    1     signl        0         0          ;14
+    2     ldval.i      1        12          ;15
+    3     ldcon.i      0         0          ;15
+    4     releq.i      0         0          ;15
+    5     jmpiz        0        13          ;15
+    6     ldadr        1        10          ;17
+    7     swait        0         0          ;17
+    8     ldcon.i      0        15          ;18
+    9     wrstr        0         0          ;18
+   10     wrlin        0         0          ;18
+   11     ldadr        1        10          ;19
+   12     signl        0         0          ;19
+   13     ldadr        1         7          ;21
+   14     swait        0         0          ;21
+   15     ldadr        1        10          ;22
+   16     swait        0         0          ;22
+   17     ldcon.i      0        15          ;23
+   18     wrstr        0        15          ;23
+   19     wrlin        0         0          ;23
+   20     ldadr        1        10          ;24
+   21     signl        0         0          ;24
+   22     ldcon.i      0         5          ;25
+   23     sleep        0         0          ;25
+   24     ldadr        1         8          ;26
+   25     signl        0         0          ;26
+   26     ldadr        1         9          ;27
+   27     swait        0         0          ;27
+   28     jmpuc        0         0          ;27
+   29     rproc        1         0          ;28
+   30     ldadr        1        11          ;34
+   31     swait        0         0          ;34
+   32     ldadr        1        12          ;34
+   33     ldval.i      1        12          ;35
+   34     ldcon.i      0         1          ;35
+   35     addop.i      0         0          ;35
+   36     store.i      0         0          ;35
+   37     ldadr        1        11          ;36
+   38     signl        0         0          ;36
+   39     ldadr        1         5          ;38
+   40     swait        0         0          ;38
+   41     ldadr        1        10          ;39
+   42     swait        0         0          ;39
+   43     ldcon.i      0        14          ;40
+   44     wrstr        0        30          ;40
+   45     ldval.i      2         5          ;40
+   46     wrval.i      0         0          ;40
+   47     wrlin        0         0          ;40
+   48     ldadr        1        10          ;41
+   49     signl        0         0          ;41
+   50     ldadr        1         7          ;43
+   51     signl        0         0          ;43
+   52     ldadr        1        10          ;44
+   53     swait        0         0          ;44
+   54     ldcon.i      0        21          ;45
+   55     wrstr        0        44          ;45
+   56     ldval.i      2         5          ;45
+   57     wrval.i      0         0          ;45
+   58     wrlin        0         0          ;45
+   59     ldadr        1        10          ;46
+   60     signl        0         0          ;46
+   61     ldadr        1         6          ;47
+   62     swait        0         0          ;47
+   63     ldadr        1         5          ;48
+   64     signl        0         0          ;48
+   65     ldadr        1        10          ;50
+   66     swait        0         0          ;50
+   67     ldcon.i      0        27          ;51
+   68     wrstr        0        65          ;51
+   69     ldval.i      2         5          ;51
+   70     wrval.i      0         0          ;51
+   71     wrlin        0         0          ;51
+   72     ldadr        1        10          ;52
+   73     signl        0         0          ;52
+   74     ldadr        1         8          ;54
+   75     swait        0         0          ;54
+   76     ldadr        1         9          ;56
+   77     signl        0         0          ;56
+   78     ldadr        1        10          ;58
+   79     swait        0         0          ;58
+   80     ldcon.i      0        13          ;59
+   81     wrstr        0        92          ;59
+   82     ldval.i      2         5          ;59
+   83     wrval.i      0         0          ;59
+   84     wrlin        0         0          ;59
+   85     ldadr        1        10          ;60
+   86     signl        0         0          ;60
+   87     ldadr        1        11          ;62
+   88     swait        0         0          ;62
+   89     ldadr        1        12          ;62
+   90     ldval.i      1        12          ;63
+   91     ldcon.i      0         1          ;63
+   92     subop.i      0         0          ;63
+   93     store.i      0         0          ;63
+   94     ldadr        1        11          ;64
+   95     signl        0         0          ;64
+   96     rproc        1         0          ;64
+   97     ldadr        1        12          ;70
+   98     ldcon.i      0         0          ;72
+   99     store.i      0         0          ;72
+  100     ldadr        1        11          ;73
+  101     ldcon.i      0         1          ;73
+  102     lobnd.i      0         0          ;73
+  103     sinit        0         0          ;73
+  104     ldadr        1         5          ;74
+  105     ldcon.i      0         5          ;74
+  106     lobnd.i      0         0          ;74
+  107     sinit        0         0          ;74
+  108     ldadr        1        10          ;75
+  109     ldcon.i      0         1          ;75
+  110     lobnd.i      0         0          ;75
+  111     sinit        0         0          ;75
+  112     ldadr        1         7          ;76
+  113     ldcon.i      0         0          ;76
+  114     lobnd.i      0         0          ;76
+  115     sinit        0         0          ;76
+  116     ldadr        1         6          ;77
+  117     ldcon.i      0         0          ;77
+  118     lobnd.i      0         0          ;77
+  119     sinit        0         0          ;77
+  120     ldadr        1         8          ;78
+  121     ldcon.i      0         0          ;78
+  122     lobnd.i      0         0          ;78
+  123     sinit        0         0          ;78
+  124     ldadr        1         9          ;79
+  125     ldcon.i      0         0          ;79
+  126     lobnd.i      0         0          ;79
+  127     sinit        0         0          ;79
+  128     cobeg        0         0          ;79
+  129     mkstk        1        56          ;81
+  130     ldadr        1        13          ;81
+  131     procv        0         0          ;81
+  132     calls        1         4          ;81
+  133     ldadr        1        24          ;82
+  134     ldcon.i      0         0          ;83
+  135     ldcon.i      0         9          ;83
+  136     for1u.i      0       145          ;83
+  137     mkstk        1        57          ;83
+  138     ldadr        1        14          ;83
+  139     ldval.i      1        24          ;84
+  140     ixary.i      0         1          ;84
+  141     procv        0         0          ;84
+  142     ldval.i      1        24          ;84
+  143     calls        1         5          ;84
+  144     for2u.i      0       137          ;84
+  145     coend        0         0          ;84
+  146     stopx        0         0          ;85

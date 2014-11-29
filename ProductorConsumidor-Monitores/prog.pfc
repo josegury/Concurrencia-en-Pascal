@@ -1,0 +1,73 @@
+program prog;
+monitor buffer;
+	export producir, consumir;
+	
+	const max = 4;{tamaño maximo del buffer}
+	
+	var vacio,lleno : condition;
+		indPro,indCon,cont : integer;
+		almacen : array[0..max] of integer;
+		
+	procedure producir(elemento : integer);
+	begin
+		if(cont > max) then 
+		begin
+			delay(lleno);{duermo al productor, porque ya no puede producir mas, pues el almacen esta lleno}
+		end;
+		almacen[indPro]:= elemento;
+		writeln('He producido el dato ',elemento);
+		cont := cont + 1;
+		indPro := (indPro + 1) mod (max + 1);
+		resume(vacio);{libero a los consumidores que se han dormida cuando no habia elementos}
+	end;
+	
+	procedure Consumir(var elemento : integer);
+	begin
+		if (cont = 0) then 
+		begin
+			delay(vacio);{como el buffer esta vacio duermo al proceso}
+		end;
+		cont := cont -1;
+		elemento:=almacen[indCon];
+		writeln('He consumido el dato ',elemento);
+		indCon := (indCon + 1) mod (max + 1);
+		resume(lleno);{como ya no esta lleno despierto a los procesos que se durmieron por ese motivo}
+	end;
+	
+	
+	
+	
+	
+{CUERPO MONITOR}
+begin
+	cont := 0;
+	indCon:=0;
+	indPro:=0;
+end;
+{FIN MONITOR}
+
+	process type productor;
+	begin
+		repeat
+			buffer.producir(random(3));
+		forever;
+	end;
+	
+	process type consumidor;
+		var dato: integer;
+	begin
+		repeat
+			buffer.consumir(dato);
+		forever;
+	end;
+
+var p : productor;
+	c1,c2 : consumidor;
+begin
+
+	cobegin
+		p;
+		c1;
+		c2;
+	coend;
+end.

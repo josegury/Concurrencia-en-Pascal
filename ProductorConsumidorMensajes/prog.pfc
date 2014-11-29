@@ -1,0 +1,33 @@
+program prog;
+
+type canalInt = channel of integer;
+var ch1 : canalInt;
+
+process p;
+var i : integer;
+begin
+	for i:=1 to 20 do
+	begin
+		if (i mod 2)<> 0 then 
+		begin
+			ch1 ! i; {envia un dato entero pos el canal ch1}
+			sleep(1);
+		end;
+	end;
+end;
+
+process q;
+	var item : integer;
+begin
+	repeat ch1 ? item; {recibe el mensaje del canal ch1 y lo guarda en item}
+		writeln(item);
+	forever;
+end;
+
+begin
+
+	cobegin
+		p;
+		q;
+	coend;
+end.

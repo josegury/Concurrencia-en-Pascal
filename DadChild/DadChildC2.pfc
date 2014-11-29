@@ -1,0 +1,123 @@
+
+
+{Author: Miguel Ángel Galdón}
+
+{Solución con proceso pasivo plato, el control del numero de prociones
+está dentro éste proceso.
+
+Generalizable a N niños
+
+
+---Solución de trabajo no depurada puede contener errores--
+
+
+{Solución utilizándo mensajes por canales síncoronos}
+
+program Ninio;
+type synchan = channel of synchronous;
+     
+
+var reponer : channel of synchronous;
+    como,wakeup,noComida,despiertame : synchan;
+       
+    p: semaphore;
+   
+
+
+procedure jugar;
+ begin
+ wait(p) ;WriteLN('Niño  Jugando');signal(p);
+  sleep(Random(5)+2);
+ end;
+ 
+procedure comer;
+ var aviso : boolean;
+ begin
+   select
+    como ! any;
+   else
+    wait(p);WriteLN('    Niño  Aviso no hay comida');signal(p);
+    noComida! any; 
+    como ! any;
+   end; {select}
+  wait(p);WriteLN('Niño  Comiendo');signal(p);
+  sleep(Random(4)+1); 
+ end;
+ 
+ procedure dormir;
+  begin
+   wait(p);WriteLN('Niño  Durmiendo');signal(p);
+   sleep(10);
+    wait(p);
+       WriteLN('    Niño, Levantame!!');
+    signal(p);
+    despiertame ! any;
+  end;
+   
+
+
+process type Tninno;
+ var i : integer;
+ begin
+  for i := 1 to 5 do
+   begin
+   jugar;
+   comer;
+   dormir;
+  end;
+ end;
+ 
+process papa;
+ var i : integer;
+ begin
+  repeat
+   WriteLN('      Papa Trabajando');
+   select
+     despiertame ? any;  
+     sleep(4); 
+     wait(p); WriteLN('      Papa: Ha despertado Niño'); signal(p);
+   or
+     noComida ? any;
+     sleep(4);
+     wait(p);  WriteLN('      Papa pone Comida'); signal(p);
+    reponer ! any;
+   or
+    terminate;
+   end {select} 
+  forever;
+ end;
+
+process comedor; {proceso pasivo para gestión necesario para N niños}
+ var  i : integer;
+      porciones : integer;
+begin
+ porciones:=0;
+ repeat
+  select
+   reponer ? any;
+   porciones:= 4;
+  or
+   when porciones > 0 =>
+    como ? any;
+    porciones := porciones-1;
+    wait(p); WriteLN('El niño ha comido, quedan ',porciones,' porciones'); signal(p);
+  or
+   terminate;
+ end;
+ forever
+end;
+ 
+ var ninno:  Tninno;
+     i: integer;
+
+begin
+initial(p,1);
+
+
+cobegin 
+ ninno;
+ papa;
+ comedor;
+coend;
+
+end.

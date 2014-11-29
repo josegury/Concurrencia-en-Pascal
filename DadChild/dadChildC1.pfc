@@ -1,0 +1,113 @@
+{Author: Miguel Ángel Galdón}
+
+{Solución simple con procesos Padre-Hijo,
+el plato está en el proceso Hijo. 
+Pedimos que nos llenen el plato
+
+
+---Solución de trabajo no depurada puede contener errores--
+
+Solución utilizándo mensajes por canales síncoronos}
+
+
+program dadChild1;
+type intchan =channel of integer;
+     synchan =channel of synchronous;
+var
+
+ chComida: intchan;
+ chWakeup: synchan;
+
+ p: semaphore;
+ 
+ 
+  
+procedure jugar;
+ begin
+ 	sleep(Random(1));
+ 	wait(p) ;
+ 	WriteLN('Niño  Jugando');
+ 	signal(p);
+  	sleep(Random(5)+2);
+ end;
+ 
+procedure comer(var PorcionesPlato : integer);
+  
+ begin
+ 	if (porcionesPlato = 0) then
+ 	begin
+    	wait(p);
+    	WriteLN('    Niño  Aviso no hay comida');
+    	signal(p);
+    	chComida ? porcionesPlato;  {espero que pongan comida}
+    end;
+    sleep(1); {para sincronizar mensajes en pantalla}
+  	wait(p);
+  	WriteLN('Niño Comiendo');
+  	signal(p);
+  	porcionesPlato:=porcionesPlato-1;
+  	sleep(Random(4)+1); 
+ end;
+ 
+ procedure dormir;
+  begin
+   wait(p);
+   WriteLN('Niño  Durmiendo');
+   signal(p);
+   sleep(5);
+   wait(p);
+   WriteLN('    Niño, despiertame!!');
+   signal(p);
+   chWakeUp ? any;
+    
+  end;
+   
+
+
+process type hijo;
+ var i : integer;
+     porcionesPlato:integer;
+ begin
+  porcionesPlato :=0;
+  for i := 1 to 3 do
+   begin
+   jugar;
+   comer(porcionesPlato);
+   dormir;
+  end;
+ end;
+ 
+process papa;
+ var i : integer;
+ begin
+  repeat
+	   wait(p);
+	   WriteLN('         Papa Trabajando');
+	   signal(p); 
+  	select
+  	   chComida ! 2;	
+	   wait(p);  
+	   WriteLN('       papa pone Comida'); 
+	   signal(p);
+	or
+	   chWakeUp ! any;
+	   wait(p);
+	   WriteLN('        Papa Despierta Niño'); 
+	   signal(p);
+	or
+	   terminate;
+    end;
+  forever;
+ end;
+
+var
+hi:hijo;
+begin
+initial(p,1);
+
+cobegin 
+ hi;
+ papa;
+coend;
+
+end.

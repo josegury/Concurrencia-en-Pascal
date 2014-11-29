@@ -1,0 +1,34 @@
+Pascal-FC post-mortem report on prog
+- Interpreter Version P5.3 - 
+Abnormal halt on termination of process p
+Reason:   deadlock
+
+
+----------
+Main program
+
+Status:  awaiting process termination
+
+
+----------
+Process p
+
+Status:  terminated
+
+
+----------
+Process q
+
+Status:  active
+pc = 20
+
+Process suspended on:
+
+ch1 (channel)
+
+
+
+==========
+Global variables
+
+(None)

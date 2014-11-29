@@ -1,0 +1,67 @@
+program barbero;
+var pantalla:semaphore;
+sCliente:semaphore;
+sBarbero:semaphore;
+sSilla:semaphore;
+sPuerta:semaphore;
+sSalir:semaphore;
+siguiente:integer;
+const sitios =5;
+procedure Entrar(var id:integer);
+begin
+	wait(pantalla);
+	writeln('Cliente ', id, ' ha entrada.');
+	siguiente:=(siguiente+1)mod sitios;
+	wait(sSilla);
+	signal(pantalla);
+end;
+procedure Pelar(var id:integer);
+begin
+	signal(sCliente);
+	wait(sBarbero);
+	signal(sSilla);
+	writeLN('Esta cortando el pelo al cliente ',id);
+end;
+procedure Salir(var id:integer);
+begin
+	wait(sPuerta);
+	signal(sSalir);
+end;
+process type tCliente(var id:integer);
+begin
+	repeat
+		Entrar(id);
+		Pelar(id);
+		Salir(id);
+	forever
+end;
+process type tBarbero;
+begin
+	repeat
+		wait(pantalla);
+		writeln('Durmiendo');
+		signal(pantalla);
+		wait(sCliente);
+		signal(sBarbero);
+		WriteLN('Comienza a cortar el pelo.');
+		{Pelando...}
+		writeLN('Ha terminado de cortar el pelo.');
+		siguiente:=(siguiente-1)mod sitios;
+		signal(sPuerta);
+		wait(sSalir);
+	forever
+end;
+var barbero:tBarbero;
+clientes:array [1..sitios] of tCliente;
+i:integer;
+begin
+	initial(pantalla,1);
+	initial(sCliente,0);
+	initial(sBarbero,0);
+	initial(sSilla,sitios);
+	initial(sPuerta,0);
+	cobegin
+		barbero;
+		for i:=1 to sitios do clientes[i](i);
+	coend;
+end.

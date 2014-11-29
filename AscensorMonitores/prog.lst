@@ -1,0 +1,76 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 monitor ascensor;
+    3     0  export entra,sale,avanzar,abrirPuerta;
+    4     0   
+    5     0   const capacidad=4;{capacidad total del jardin}
+    6     0      NPlantas=5;
+    7     0   var ocupado : integer;
+    8     0    Eplanta : array [1..NPlantas] of condition; 
+    9     0    Splanta : array [1..NPlantas] of condition; 
+   10     0    pisoActual : integer;
+   11     0    
+   12     0  {procesos del ascensor}
+   13     0 {-------------------Terminar------------}
+   14     0  procedure avanzar;
+   15     0  begin
+   16     0  end;
+   17     1  
+   18     1  procedure abrirPuerta;
+   19     1   {dejar entrar
+   20     1   dejar salir
+   21     1   si el ascensor esta en la planta tres, se desbloquean todos los procesos con destino, bloqueados en la planta 3}
+   22     1  begin
+   23     1  end;
+   24     2 {----------------------------------------} 
+   25     2  {Procesos de las personas}
+   26     2  procedure entra(id,origen : integer);
+   27     2  begin 
+   28     2   if(origen <> pisoActual or ocupado = capacidad) then
+***********                                      ^ 3        ^28 --
+   29     7   begin
+   30     7    {utiliza el array de condiciones para saber que procesos parar}
+   31     7    delay(Eplanta[origen]);{si el ascensor esta lleno, el proceso que ejecuta el delay es bloqueado, hasta encontrar un r
+
+ Error diagnostics
+
+E3 -  type error
+E28 -  unexpected symbol
+FATAL ERROR - input line too long
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0    0    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 ascensor     46     variable    monvar          3      True    1    5    0
+ 48 capacidad     0     constant    integer         0     False    2    4    0
+ 49 nplantas     48     constant    integer         0     False    2    5    0
+ 50 ocupado      49     variable    integer         0      True    1    7    0
+ 51 eplanta      50     variable    array           1      True    1    8    0
+ 52 splanta      51     variable    array           2      True    1   13    0
+ 53 pisoactual   52     variable    integer         0      True    1   18    0
+ 54 avanzar      53     monproc     notyp           4      True    2    0    0
+ 55 abrirpuert   54     monproc     notyp           5      True    2    1    0
+ 56 entra        55     monproc     notyp           6      True    2    2    0
+ 57 id            0     variable    integer         0      True    3    5    0
+ 58 origen       57     variable    integer         0      True    3    6    0
+
+Generated P-code
+
+    0     rproc        0         0          ;15
+    1     rproc        0         0          ;22
+    2     ldval.i      3         6          ;28
+    3     ldval.i      1        18          ;28
+    4     ldval.i      1         7          ;28
+    5     ldcon.i      0         4          ;28
+    6     jmpiz        0         0          ;28

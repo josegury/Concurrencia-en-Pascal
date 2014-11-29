@@ -1,0 +1,55 @@
+program prog;
+
+type intchan = channel of integer;
+
+process buffer( var put,get : intchan);
+	const CAPBUFF = 32;
+var buff : array [0..31] of integer;
+	top,base : integer;
+
+begin 	
+	top:= 0;
+	base := 0;
+	repeat
+		select 
+			put ? buff[top];
+			top := (top+1) mod CAPBUFF;
+		or
+			get ! buff[base];
+			base := (base + 1) mod CAPBUFF;
+		end{-select}
+	forever
+end;
+
+process productor(var put : intchan);
+	var i : integer;
+begin
+	for i:= 1 to 100 do
+	begin
+		if (i mod 2) = 0 then
+		begin
+			put ! i;
+			writeln('Dado producido ', i);
+		end; 
+	end;
+end;
+
+process consumidor(var get : intchan);
+ var temp : integer;
+begin
+	while (temp <> 100) do
+	begin
+	 	get ? temp;
+	 	writeln('	Dado consumido ', temp);
+	end;
+end;
+
+{MAIN}
+var put,get : intchan;
+begin
+	cobegin
+		buffer(put,get);
+		productor(put);
+		consumidor(get);
+	coend;
+end.

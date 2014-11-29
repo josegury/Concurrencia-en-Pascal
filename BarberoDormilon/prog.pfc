@@ -1,0 +1,86 @@
+program prog;
+var silla: semaphore;
+sbarbero: semaphore;
+scliente: semaphore;
+Puerta: semaphore;
+NClientesale: semaphore;
+clientes: semaphore;
+modi: semaphore;
+NClientes: integer;
+
+process Barbero;
+begin
+	repeat
+		signal(sbarbero);
+		if (NClientes = 0) then
+		begin
+			wait(clientes);
+				writeln('Estoy Durmiendo');
+			signal(clientes);		
+		end;
+		wait(scliente);
+		wait(clientes);
+			writeln('Estoy Afeitando');
+		signal(clientes);
+		sleep(5);
+		signal(Puerta);
+		wait(NClientesale);
+	forever
+end;
+
+process type cliente(id : integer);
+begin
+	
+	wait(modi);
+		NClientes:= NClientes +1;
+	signal(modi);
+
+	wait(silla);
+			wait(clientes);
+				writeln('Entra cliente ',id);
+			signal(clientes);
+			
+		signal(scliente);
+			wait(clientes);
+				writeln('Se sienta el cliente ',id);
+			signal(clientes);
+		wait(sbarbero);
+	signal(silla);
+	
+	wait(clientes);
+		writeln('Está afeitando al cliente ',id);
+	signal(clientes);
+	
+	wait(Puerta);
+	
+	signal(NClientesale);
+	
+	wait(clientes);
+		writeln('Sale cliente ',id);
+	signal(clientes);
+	
+	wait(modi);
+		NClientes:= NClientes - 1;
+	signal(modi);
+end;
+
+var cls: array[0..9] of cliente;
+i: integer;
+
+begin
+	{Inicializacion de variables}
+	NClientes:=0;
+	initial(modi,1);
+	initial(silla,5);
+	initial(clientes,1);
+	initial(scliente,0);
+	initial(sbarbero,0);
+	initial(Puerta,0);
+	initial(NClientesale,0);
+	{ejecucion concurrente del programa}
+	cobegin
+		Barbero;
+		for i:= 0 to 9 do
+			cls[i](i);
+	coend;
+end.

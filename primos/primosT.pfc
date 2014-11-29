@@ -1,0 +1,91 @@
+program primosT;
+
+{Miguel Ángel Galdón, 2013}
+{Obtenemos primos a través de un pipeline de filtros}
+
+{Versión con terminate}
+
+ const N=17;
+
+ type Tcanal = channel of integer;
+      Tcanales = array [0..N] of Tcanal;
+      synchan = channel of synchronous;
+ var pipeline : Tcanales;
+     output: Tcanales; {1 más de los necesarios}
+     stop : synchan;
+     
+ process numbers (var out : Tcanal;
+                  var stopChan : synchan); {envia por pipeline[0]}
+  {produce una serie de enteros}
+  var i : integer;
+      stop : boolean;
+  begin
+   i:=2;
+   stop := false;
+   while not stop do
+    select
+     stopchan ? any;
+     stop := true;
+    else
+    out ! i;
+    i := i+1;
+    end;{select}
+  end;
+  
+ process consumer (var into :Tcanal; var stop:synchan);
+  {consume todos los enteros que pasan la criba}
+  var i: integer;
+  begin   
+   into ? i;   {cojo el primer desechado}
+   stop ! any; {aviso no gererar más} 
+   repeat
+    select
+     into ? i;     {tengo que recoger los que}
+    or             {quedaran en el pipeline}
+     terminate;
+    end {select}
+   forever 
+  end;
+  
+ process type TFiltro ( var left,right,down : Tcanal);
+   {implementa los filtros}
+  var primero,siguiente : integer;
+  begin
+   left ? primero; {cogemos izquierda}
+   down ! primero; {mandamos abajo}
+   repeat
+    select
+     left ? siguiente;
+     if (siguiente mod primero <> 0) then
+      right ! siguiente;
+    or
+     terminate;
+    end; {select}   
+   forever;
+  end;
+  
+  process outproc (var outs : Tcanales);
+   {genera la salida del programa}
+   var i, num : integer;
+   begin
+    for i := 1 to N do
+     begin
+      outs[i] ? num;
+      writeln(num);
+     end;
+    end;
+  
+ var filtro: array[1..N] of TFiltro;
+     i : integer;
+     
+  
+begin
+ cobegin
+  numbers(pipeline[0],stop);
+  consumer(pipeline[N],stop);
+  for i := 1 to N do
+   filtro[i] (pipeline[i-1],pipeline[i],output[i]);
+  outproc(output);
+ coend;
+
+end.

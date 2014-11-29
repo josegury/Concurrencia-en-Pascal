@@ -1,0 +1,54 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 
+    3     0 
+    4     0 
+    5     0 
+    6     0 
+    7     0 
+    8     0 process type filosofo (name : integer); 
+    9     0 begin 
+   10     0  repeat 
+   11     0  Pensar; 
+***********       ^ 0 
+   12     0  Coger palillos; 
+***********      ^ 0      ^ 9 
+   13     0  Comer; 
+***********      ^ 0 
+   14     0  Soltar Palillos; 
+***********       ^ 0      ^ 9 
+   15     0  forever 
+   16     1 end;
+   17     2  
+   18     2 {MAIN}
+   19     2 begin
+   20     2 
+   21     2 end.
+
+ Error diagnostics
+
+E0 -  undeclared identifier
+E9 -  ';' expected
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0    2    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 filosofo     46     type id     process         3      True    1    0    0
+ 48 name          0     variable    integer         0      True    2    5    0
+
+Generated P-code
+
+    0     jmpuc        0         0          ;14
+    1     rproc        1         0          ;15
+    2     stopx        0         0          ;19

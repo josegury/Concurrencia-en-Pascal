@@ -1,0 +1,205 @@
+- Pascal-FC for IBM PC compatibles - 
+- GNU Compiler Version P5.2
+
+G L Davies  &  A Burns, University of York
+
+Compiler listing
+
+    1     0 program prog;
+    2     0 
+    3     0 monitor jardin;
+    4     0   export entra, sale,ocupacion;{se ayaden al monitor las funciones que utilizara}
+    5     0   
+    6     0   {variables del monitor}
+    7     0   
+    8     0   const capacidad=4;{capacidad total del jardin}
+    9     0   var ocupado : integer;
+   10     0    lleno : condition; 
+   11     0  
+   12     0 {----- Las funciones, aunque son de las personas pero se debe programar en el monitor, pues son las acciones -----}
+   13     0  
+   14     0  procedure entra(id:integer);
+   15     0  begin
+   16     0   if(ocupado = capacidad) then
+   17     4   begin
+   18     4    delay(lleno);{si el jardin esta lleno, el proceso que ejecuta el delay es bloqueado, hasta encontrar un resume}
+   19     6   end;
+   20     6   writeLN('Persona ',id,' entra al jardin');
+   21    13   ocupado:=ocupado+1;
+   22    18  end;
+   23    19  
+   24    19  
+   25    19  procedure sale(id:integer);{la persona sale del jardin (monitor)}
+   26    19  begin
+   27    19   writeLN('Persona ',id,' sale del jardin');
+   28    26   ocupado:=ocupado-1;
+   29    31   resume(lleno);{libera al primer proceso dormido segun la cola}
+   30    33  end;
+   31    34  
+   32    34  procedure ocupacion;{ver personas del monitor}
+   33    34  begin
+   34    34   writeLN('Ocupacion: ',ocupado, ' personas');
+   35    41  end;
+   36    42  
+   37    42 {---------- Cuerpo del monitor ----------}
+   38    42 begin 
+   39    43  ocupado:=0;
+   40    46 end;
+   41    47  
+   42    47 {--------------- Fin Monitor ------------}
+   43    47 
+   44    47 {----------- Funciones fuera del monitor -----------}
+   45    47 
+   46    47 process type Tpersona(id:integer);
+   47    47 begin
+   48    47  sleep(Random(3));{para que las personas no entren todasd a la vez}
+   49    50  jardin.entra(id);
+   50    56  sleep(Random(5)+1);{visita}
+   51    61  jardin.sale(id);
+   52    67 end;
+   53    68 
+   54    68 process MuestraOcupacion;{para mostrar la ocupacion que hay dentro del jardin}
+   55    68 begin
+   56    68  repeat
+   57    68   sleep(2);
+   58    70   jardin.ocupacion;
+   59    75  forever;
+   60    76 end;
+   61    77 
+   62    77 { MAIN }
+   63    77 
+   64    77 var persona : array [1..15] of Tpersona;
+   65    77  i:integer;
+   66    77 begin
+   67    78  cobegin
+   68    79   for i:=1 to 15 do
+   69    83   begin
+   70    83    persona[i](i);
+   71    90   end;
+   72    91   MuestraOcupacion;
+   73    95  coend;
+   74    96 end.
+
+
+
+Symbol table
+
+    name       link      objekt       type         ref      nrm  lev  adr  aux
+
+ 45 _main        44     procedure   notyp           2      True    0   77    0
+ 46 any           0     variable    synch           0      True    1    5    0
+ 47 jardin       46     variable    monvar          3      True    1    5   42
+ 48 capacidad     0     constant    integer         0     False    2    4    0
+ 49 ocupado      48     variable    integer         0      True    1    7    0
+ 50 lleno        49     variable    condition       0      True    1    8    0
+ 51 entra        50     monproc     notyp           4      True    2    0    0
+ 52 id            0     variable    integer         0      True    3    5    0
+ 53 sale         51     monproc     notyp           5      True    2   19    0
+ 54 id            0     variable    integer         0      True    3    5    0
+ 55 ocupacion    53     monproc     notyp           6      True    2   34    0
+ 56 tpersona     47     type id     process         7      True    1   47    0
+ 57 id            0     variable    integer         0      True    2    5    0
+ 58 muestraocu   56     variable    process         8      True    1    9    0
+ 59 $            58     type id     process         8      True    1   68    0
+ 60 persona      59     variable    array           1      True    1   10    0
+ 61 i            60     variable    integer         0      True    1   25    0
+
+Generated P-code
+
+    0     ldval.i      1         7          ;16
+    1     ldcon.i      0         4          ;16
+    2     releq.i      0         0          ;16
+    3     jmpiz        0         6          ;16
+    4     ldadr        1         8          ;18
+    5     delay        0         0          ;18
+    6     ldcon.i      0         8          ;20
+    7     wrstr        0         0          ;20
+    8     ldval.i      3         5          ;20
+    9     wrval.i      0         0          ;20
+   10     ldcon.i      0        16          ;20
+   11     wrstr        0         8          ;20
+   12     wrlin        0         0          ;20
+   13     ldadr        1         7          ;20
+   14     ldval.i      1         7          ;21
+   15     ldcon.i      0         1          ;21
+   16     addop.i      0         0          ;21
+   17     store.i      0         0          ;21
+   18     rproc        0         0          ;21
+   19     ldcon.i      0         8          ;27
+   20     wrstr        0        24          ;27
+   21     ldval.i      3         5          ;27
+   22     wrval.i      0         0          ;27
+   23     ldcon.i      0        16          ;27
+   24     wrstr        0        32          ;27
+   25     wrlin        0         0          ;27
+   26     ldadr        1         7          ;27
+   27     ldval.i      1         7          ;28
+   28     ldcon.i      0         1          ;28
+   29     subop.i      0         0          ;28
+   30     store.i      0         0          ;28
+   31     ldadr        1         8          ;29
+   32     resum        0         0          ;29
+   33     rproc        0         0          ;29
+   34     ldcon.i      0        11          ;34
+   35     wrstr        0        48          ;34
+   36     ldval.i      1         7          ;34
+   37     wrval.i      0         0          ;34
+   38     ldcon.i      0         9          ;34
+   39     wrstr        0        59          ;34
+   40     wrlin        0         0          ;34
+   41     rproc        0         0          ;34
+   42     prsel        0         0          ;35
+   43     ldadr        1         7          ;38
+   44     ldcon.i      0         0          ;39
+   45     store.i      0         0          ;39
+   46     mretn        0         0          ;39
+   47     ldcon.i      0         3          ;48
+   48     stfun.i      0        19          ;48
+   49     sleep        0         0          ;48
+   50     ldadr        1         5          ;49
+   51     enmon        0         0          ;49
+   52     mkstk        0        51          ;49
+   53     ldval.i      2         5          ;49
+   54     calls        0         5          ;49
+   55     exmon        0         0          ;49
+   56     ldcon.i      0         5          ;50
+   57     stfun.i      0        19          ;50
+   58     ldcon.i      0         1          ;50
+   59     addop.i      0         0          ;50
+   60     sleep        0         0          ;50
+   61     ldadr        1         5          ;51
+   62     enmon        0         0          ;51
+   63     mkstk        0        53          ;51
+   64     ldval.i      2         5          ;51
+   65     calls        0         5          ;51
+   66     exmon        0         0          ;51
+   67     rproc        1         0          ;51
+   68     ldcon.i      0         2          ;57
+   69     sleep        0         0          ;57
+   70     ldadr        1         5          ;58
+   71     enmon        0         0          ;58
+   72     mkstk        0        55          ;58
+   73     calls        0         4          ;58
+   74     exmon        0         0          ;58
+   75     jmpuc        0        68          ;58
+   76     rproc        1         0          ;59
+   77     mexec        0        43          ;65
+   78     cobeg        0         0          ;65
+   79     ldadr        1        25          ;67
+   80     ldcon.i      0         1          ;68
+   81     ldcon.i      0        15          ;68
+   82     for1u.i      0        91          ;68
+   83     mkstk        1        56          ;69
+   84     ldadr        1        10          ;69
+   85     ldval.i      1        25          ;70
+   86     ixary.i      0         1          ;70
+   87     procv        0         0          ;70
+   88     ldval.i      1        25          ;70
+   89     calls        1         5          ;70
+   90     for2u.i      0        83          ;70
+   91     mkstk        1        59          ;71
+   92     ldadr        1         9          ;71
+   93     procv        0         0          ;71
+   94     calls        1         4          ;71
+   95     coend        0         0          ;72
+   96     stopx        0         0          ;73
